@@ -3,10 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MEDIATYPE_ERROR -1     // titleType inválido
 #define MEM_ERROR 0
 #define SUCCESS 1
-
-enum validTypes {WRONG_TITLETYPE=2, MOVIE, SERIES}; //enum con constantes de títulos válidos para utilizar en la inserción
 
 typedef struct genre{
     char * genre;
@@ -39,12 +38,12 @@ typedef struct mediaCDT{
 
 static unsigned int findTitleType(char * title){
     if (strcmp(title, "movies")==0){
-        return MOVIE;
+        return MEDIATYPE_MOVIE;
     }
     else if ( strcmp(title, "tvSeries") == 0){
-        return SERIES;
+        return MEDIATYPE_SERIES;
     }
-    return WRONG_TITLETYPE;
+    return MEDIATYPE_ERROR;
 }
 
 static int copyStruct(TMedia * mediaVec, TMedia content, size_t index){
@@ -63,16 +62,16 @@ static int copyStruct(TMedia * mediaVec, TMedia content, size_t index){
  * @param title variable con MOVIE si content es una película o SERIES si es una serie
  * @return
  */
-static int copyMedia(TList list, TMedia content, unsigned int title){
-    if (title == MOVIE){
+static int copyMedia(TList list, TMedia content, mediaType title){
+    if (title == MEDIATYPE_MOVIE){
         list->moviesCount++;
         if ( copyStruct(list->movies, content, list->moviesCount) != MEM_ERROR)
-            return MOVIE;
+            return MEDIATYPE_MOVIE;
     }
-    else if ( title == SERIES){
+    else if ( title == MEDIATYPE_SERIES){
         list->seriesCount++;
         if ( copyStruct(list->series, content, list->seriesCount) != MEM_ERROR)
-            return MOVIE;
+            return MEDIATYPE_SERIES;
     }
     return MEM_ERROR;
 }
@@ -88,7 +87,7 @@ static int copyMedia(TList list, TMedia content, unsigned int title){
  * película o SERIES si se copió una serie.
  * @return
  */
-static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, unsigned int title, int * flag) {
+static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, mediaType title, int * flag) {
     int c;
     if (list == NULL || (c = strcmp(genre, list->genre)) < 0) {
         TList newGenre = malloc(sizeof(TGenre));

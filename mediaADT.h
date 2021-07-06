@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+typedef enum {MEDIATYPE_MOVIE=2, MEDIATYPE_SERIES} mediaType; //enum con constantes de títulos válidos
+
 typedef struct mediaCDT * mediaADT;
 
 typedef struct media{
