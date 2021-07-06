@@ -2,9 +2,7 @@
 #define TPEFINAL_MEDIAADT_H
 
 #include <stdlib.h>
-
-#define POS(Y,MIN) ( (X) - (MIN) )
-#define YEAR(P,MIN) ( (P) + (MIN) )
+typedef enum {MEDIATYPE_MOVIE=2, MEDIATYPE_SERIES} mediaType; //enum con constantes de títulos válidos
 
 typedef struct mediaCDT * mediaADT;
 
