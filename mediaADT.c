@@ -3,6 +3,7 @@
 #define POS(Y,MIN) ( (Y) - (MIN) )
 #define YEAR(P,MIN) ( (P) + (MIN) )
 #define IS_VALID_YEAR(Y,MIN) ((Y)>=(MIN))
+
 typedef struct genre{
     char * genre;
     TMedia * series;
