@@ -1,6 +1,8 @@
 #ifndef TPEFINAL_MEDIAADT_H
 #define TPEFINAL_MEDIAADT_H
 
+#include <stdlib.h>
+
 typedef struct mediaCDT * mediaADT;
 
 typedef struct media{
@@ -13,5 +15,12 @@ typedef struct media{
     unsigned long numVotes;
     float averageRating;
 } TMedia;
+
+/**
+ * Crea un nuevo mediaADT para el manejo de peliculas / series.
+ * @param minYear el menor año de estreno para peliculas / series
+ * @return
+ */
+mediaADT newMediaADT ( const size_t minYear);
 
 #endif //TPEFINAL_MEDIAADT_H

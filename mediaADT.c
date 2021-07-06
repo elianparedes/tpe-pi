@@ -1,4 +1,5 @@
 #include "mediaADT.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,14 +28,14 @@ typedef struct year {
     TList genres;
 } TYear;
 
-struct mediaCDT{
+typedef struct mediaCDT{
     TYear * years;
     size_t currentYear;
     size_t minYear;
     size_t maxYear;
     size_t dim;
     size_t size;
-};
+}mediaCDT;
 
 static unsigned int findTitleType(char * title){
     if (strcmp(title, "movies")==0){
@@ -76,6 +77,7 @@ static int copyMedia(TList list, TMedia content, unsigned int title){
     return MEM_ERROR;
 }
 
+
 /**
  * Función auxiliar recursiva que agrega película/serie a la lista de géneros
  * @param list lista de géneros de películas/series
@@ -86,23 +88,29 @@ static int copyMedia(TList list, TMedia content, unsigned int title){
  * película o SERIES si se copió una serie.
  * @return
  */
-static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, unsigned int title, int * flag){
+static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, unsigned int title, int * flag) {
     int c;
-    if (list == NULL || (c=strcmp(genre, list->genre)) < 0){
-        TList newGenre= malloc(sizeof(TGenre));
-        if (newGenre == NULL){
-            *flag=MEM_ERROR;
+    if (list == NULL || (c = strcmp(genre, list->genre)) < 0) {
+        TList newGenre = malloc(sizeof(TGenre));
+        if (newGenre == NULL) {
+            *flag = MEM_ERROR;
             return list;
         }
-        *flag= copyMedia(list, content, title);
+        *flag = copyMedia(list, content, title);
+        return list;
+    } else if (c == 0) {
+        *flag = copyMedia(list, content, title);
         return list;
     }
-    else if (c==0){
-        *flag= copyMedia(list, content, title);
-        return list;
-    }
-    list->next= addMediaByGenre_Rec(list->next, content, genre, title, flag);
+    list->next = addMediaByGenre_Rec(list->next, content, genre, title, flag);
     return list;
+}
+
+mediaADT newMediaADT ( const size_t minYear )
+{
+    mediaADT new = calloc(1,sizeof (mediaCDT));
+    new->minYear = new->maxYear = minYear;
+    return new;
 }
 
 
