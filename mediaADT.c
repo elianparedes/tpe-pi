@@ -1,5 +1,5 @@
 #include "mediaADT.h"
-#include <stdlib.h>
+
 
 typedef struct genre{
     char * genre;
@@ -20,15 +20,21 @@ typedef struct year {
     TList genres;
 } TYear;
 
-struct mediaCDT{
+typedef struct mediaCDT{
     TYear * years;
     size_t currentYear;
     size_t minYear;
     size_t maxYear;
     size_t dim;
     size_t size;
-};
+}mediaCDT;
 
 
+mediaADT newMediaADT ( const size_t minYear )
+{
+    mediaADT new = calloc(1,sizeof (mediaCDT));
+    new->minYear = new->maxYear = minYear;
+    return new;
+}
 
 
