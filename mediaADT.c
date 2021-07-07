@@ -9,7 +9,6 @@
 #define MEM_ERROR 0
 #define SUCCESS 1
 
-
 typedef struct genre{
     char * genre;
     TMedia * series;
@@ -37,9 +36,9 @@ typedef struct mediaCDT{
     size_t maxYear;
     size_t dim;
     size_t size;
-}mediaCDT;
+} mediaCDT;
 
-mediaADT newMediaADT ( const size_t minYear )
+mediaADT newMediaADT (const size_t minYear)
 {
     mediaADT new = calloc(1,sizeof (mediaCDT));
     //Se setean los extremos del vector dinamico. Inicialmente el extremo superior es igual al inferior
@@ -48,7 +47,7 @@ mediaADT newMediaADT ( const size_t minYear )
 }
 
 static unsigned int findTitleType(char * title){
-    if (strcmp(title, "movies")==0){
+    if (strcmp(title, "movies") == 0){
         return MEDIATYPE_MOVIE;
     }
     else if ( strcmp(title, "tvSeries") == 0){
@@ -87,7 +86,6 @@ static int copyMedia(TList list, TMedia content, mediaType title){
     return MEM_ERROR;
 }
 
-
 /**
  * Función auxiliar recursiva que agrega película/serie a la lista de géneros
  * @param list lista de géneros de películas/series
@@ -116,10 +114,15 @@ static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, media
     return list;
 }
 
-size_t countContentByYear( const mediaADT media , const unsigned short year , mediaType MEDIATYPE_ )
+static int isYearValid(mediaADT media, const unsigned short year){
+    return IS_VALID_YEAR(year, media->minYear) && media->years != NULL;
+}
+
+size_t countContentByYear(const mediaADT media, const unsigned short year, mediaType MEDIATYPE_ )
 {
-    if (!IS_VALID_YEAR(year, media->minYear) || media->years == NULL)
+    if (!isYearValid(media, year))
         return 0;
+
     size_t aux;
     switch (MEDIATYPE_) {
         case MEDIATYPE_MOVIE:
@@ -128,6 +131,6 @@ size_t countContentByYear( const mediaADT media , const unsigned short year , me
         case MEDIATYPE_SERIES:
             aux = media->years[POS(year, media->minYear)].seriesCount;
             break;
-    };
+    }
     return aux;
 }
