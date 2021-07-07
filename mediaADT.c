@@ -5,14 +5,14 @@
 #define POS(Y,MIN) ( (Y) - (MIN) )
 #define YEAR(P,MIN) ( (P) + (MIN) )
 #define IS_VALID_YEAR(Y,MIN) ((Y)>=(MIN))
-#define MEDIATYPE_ERROR -1     // titleType inválido
-#define MEM_ERROR 0
-#define SUCCESS 1
+#define SUCCESS 100
+
+enum errorStates {CONTENTTYPE_ERROR = 200 , MEM_ERROR , INVALIDYEAR_ERROR };
 
 typedef struct genre{
     char * genre;
-    TMedia * series;
-    TMedia * movies;
+    TContent * series;
+    TContent * movies;
     size_t moviesCount;
     size_t seriesCount;
     struct genre * next;
@@ -20,44 +20,46 @@ typedef struct genre{
 
 typedef TGenre * TList;
 
-typedef struct year {
-    unsigned short year;
+struct year {
+    TList genres;
+    TContent * bestMovie;
+    TContent * bestSeries;
+    size_t bestMovieRating;
+    size_t bestSeriesRating;
     size_t moviesCount;
     size_t seriesCount;
-    TMedia * bestMovie;
-    TMedia * bestSeries;
-    TList genres;
-} TYear;
+};
+
+typedef struct year * TYear;
 
 typedef struct mediaCDT{
     TYear * years;
-    size_t currentYear;
-    size_t minYear;
-    size_t maxYear;
-    size_t dim;
-    size_t size;
+    size_t currentYear; //Iterador por año
+    size_t minYear;     //Minimo año posible
+    size_t dim;   // cant de memoria ocupada
+    size_t size; // cant memoria reservada
 } mediaCDT;
 
 mediaADT newMediaADT (const size_t minYear)
 {
     mediaADT new = calloc(1,sizeof (mediaCDT));
     //Se setean los extremos del vector dinamico. Inicialmente el extremo superior es igual al inferior
-    new->minYear = new->maxYear = minYear;
+    new->minYear = minYear;
     return new;
 }
 
 static unsigned int findTitleType(char * title){
     if (strcmp(title, "movies") == 0){
-        return MEDIATYPE_MOVIE;
+        return CONTENTTYPE_MOVIE;
     }
     else if ( strcmp(title, "tvSeries") == 0){
-        return MEDIATYPE_SERIES;
+        return CONTENTTYPE_SERIES;
     }
-    return MEDIATYPE_ERROR;
+    return CONTENTTYPE_ERROR;
 }
 
-static int copyStruct(TMedia * mediaVec, TMedia content, size_t index){
-    mediaVec= realloc(mediaVec, sizeof(TMedia)*index);
+static int copyStruct(TContent * mediaVec, TContent content, size_t index){
+    mediaVec= realloc(mediaVec, sizeof(TContent)*index);
     if ( mediaVec == NULL){
         return MEM_ERROR;
     }
@@ -72,16 +74,16 @@ static int copyStruct(TMedia * mediaVec, TMedia content, size_t index){
  * @param title variable con MOVIE si content es una película o SERIES si es una serie
  * @return
  */
-static int copyMedia(TList list, TMedia content, mediaType title){
-    if (title == MEDIATYPE_MOVIE){
+static int copyMedia(TList list, TContent content, contentType title){
+    if (title == CONTENTTYPE_MOVIE){
         list->moviesCount++;
         if ( copyStruct(list->movies, content, list->moviesCount) != MEM_ERROR)
-            return MEDIATYPE_MOVIE;
+            return CONTENTTYPE_MOVIE;
     }
-    else if ( title == MEDIATYPE_SERIES){
+    else if ( title == CONTENTTYPE_SERIES){
         list->seriesCount++;
         if ( copyStruct(list->series, content, list->seriesCount) != MEM_ERROR)
-            return MEDIATYPE_SERIES;
+            return CONTENTTYPE_SERIES;
     }
     return MEM_ERROR;
 }
@@ -96,16 +98,17 @@ static int copyMedia(TList list, TMedia content, mediaType title){
  * película o SERIES si se copió una serie.
  * @return
  */
-static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, mediaType title, int * flag) {
+static TList addMediaByGenre_Rec(TList list, TContent content, char * genre, contentType title, int * flag) {
     int c;
-    if (list == NULL || (c = strcmp(genre, list->genre)) < 0) {
+    if (list == NULL || (c = strcasecmp(genre, list->genre)) < 0) {
         TList newGenre = malloc(sizeof(TGenre));
         if (newGenre == NULL) {
             *flag = MEM_ERROR;
             return list;
         }
         *flag = copyMedia(list, content, title);
-        return list;
+        newGenre->next = list;
+        return newGenre;
     } else if (c == 0) {
         *flag = copyMedia(list, content, title);
         return list;
@@ -114,22 +117,65 @@ static TList addMediaByGenre_Rec(TList list, TMedia content, char * genre, media
     return list;
 }
 
-static int isYearValid(mediaADT media, const unsigned short year){
-    return IS_VALID_YEAR(year, media->minYear) && media->years != NULL;
+static int isYearValid (mediaADT media , const unsigned short year)
+{
+    if (IS_VALID_YEAR(year, media->minYear))
+        return INVALIDYEAR_ERROR;
+    if ( year > YEAR(media->size-1,media->minYear))
+        return MEM_ERROR;
+    return SUCCESS;
 }
 
-size_t countContentByYear(const mediaADT media, const unsigned short year, mediaType MEDIATYPE_ )
+size_t countContentByYear(const mediaADT media, const unsigned short year, contentType MEDIATYPE_ )
 {
-    if (!isYearValid(media, year))
+    if (isYearValid(media, year) != SUCCESS )
         return 0;
 
     size_t aux;
     switch (MEDIATYPE_) {
-        case MEDIATYPE_MOVIE:
-            aux = media->years[POS(year, media->minYear)].moviesCount;
+        case CONTENTTYPE_MOVIE:
+            aux = media->years[POS(year, media->minYear)]->moviesCount;
             break;
-        case MEDIATYPE_SERIES:
-            aux = media->years[POS(year, media->minYear)].seriesCount;
+        case CONTENTTYPE_SERIES:
+            aux = media->years[POS(year, media->minYear)]->seriesCount;
+            break;
+    }
+    return aux;
+}
+
+/**
+ * Funcion para buscar un genero en la lista de Generos
+ * @param first es el puntero al primer genero de la lista
+ * @param genre es el genero a bsucar en la lista
+ * @return NULL si el genero no esta en la lista. Si esta en la lista, retorna el puntero al nodo.
+ */
+
+static TList searchGenre ( const TList first , const char * genre )
+{
+    int c;
+    if ( first == NULL || (c = strcasecmp(first->genre,genre) ) > 0 )
+        return NULL;
+    if ( c == 0 )
+        return first;
+    return searchGenre(first->next , genre) ;
+}
+
+size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre ,  contentType MEDIATYPE_ )
+{
+    if (isYearValid(media, year) != SUCCESS )
+        return INVALIDYEAR_ERROR;
+
+    TList auxGenre = searchGenre(media->years[POS(year, media->minYear)]->genres , genre );
+    if ( auxGenre == NULL )
+        return 0;
+
+    size_t aux;
+    switch (MEDIATYPE_) {
+        case CONTENTTYPE_MOVIE:
+            aux = auxGenre->moviesCount;
+            break;
+        case CONTENTTYPE_SERIES:
+            aux = auxGenre->seriesCount;
             break;
     }
     return aux;
