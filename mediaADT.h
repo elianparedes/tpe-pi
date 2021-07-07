@@ -46,4 +46,13 @@ size_t countContentByYear(const mediaADT media, const unsigned short year, conte
  */
 size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre ,  contentType MEDIATYPE_ );
 
+/**
+ * Funcion que devuelve la pelicula/serie con mayor cantidad de votos del año.
+ * @param media ADT creado para el manejo de peliculas/series.
+ * @param year Año del cual se desea obtener la pelicula/serie.
+ * @param CONTENTTYPE_ Tipo del contenido que se desea obtener
+ * @return TContent con los datos correspondientes a la pelicula/serie
+ */
+TContent mostVoted(const mediaADT media, const unsigned short year, contentType CONTENTTYPE_);
+
 #endif //TPEFINAL_MEDIAADT_H
