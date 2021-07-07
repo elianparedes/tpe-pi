@@ -48,72 +48,46 @@ mediaADT newMediaADT (const size_t minYear)
     return new;
 }
 
-static unsigned int findTitleType(char * title){
-    if (strcmp(title, "movies") == 0){
-        return CONTENTTYPE_MOVIE;
-    }
-    else if ( strcmp(title, "tvSeries") == 0){
-        return CONTENTTYPE_SERIES;
-    }
-    return CONTENTTYPE_ERROR;
-}
-
-static int copyStruct(TContent * mediaVec, TContent content, size_t index){
+static int copyStruct(TContent * mediaVec, TContent content, size_t index, TContent * copy){
     mediaVec= realloc(mediaVec, sizeof(TContent)*index);
     if ( mediaVec == NULL){
         return MEM_ERROR;
     }
     mediaVec[index]=content;
+    *copy= content;
     return SUCCESS;
 }
 
-/**
- * Funcion auxiliar de addMediaByGenre_Rec que agrega película/serie a TGenre
- * @param list nodo al género a copiar
- * @param content película/serie que será copiada
- * @param title variable con MOVIE si content es una película o SERIES si es una serie
- * @return
- */
-static int copyMedia(TList list, TContent content, contentType title){
+static int copyContent(TList list, TContent content, contentType title, TContent * copy){
     if (title == CONTENTTYPE_MOVIE){
         list->moviesCount++;
-        if ( copyStruct(list->movies, content, list->moviesCount) != MEM_ERROR)
+        if ( copyStruct(list->movies, content, list->moviesCount, copy) != MEM_ERROR)
             return CONTENTTYPE_MOVIE;
     }
     else if ( title == CONTENTTYPE_SERIES){
         list->seriesCount++;
-        if ( copyStruct(list->series, content, list->seriesCount) != MEM_ERROR)
+        if ( copyStruct(list->series, content, list->seriesCount, copy) != MEM_ERROR)
             return CONTENTTYPE_SERIES;
     }
     return MEM_ERROR;
 }
 
-/**
- * Función auxiliar recursiva que agrega película/serie a la lista de géneros
- * @param list lista de géneros de películas/series
- * @param content película/serie que será copiada
- * @param genre género de la película/serie
- * @param title variable con MOVIE si content es una película o SERIES si es una serie
- * @param flag indica con MEM_ERROR si hubo un error de memoria al finalizar la ejecucion, MOVIE si se copió una
- * película o SERIES si se copió una serie.
- * @return
- */
-static TList addMediaByGenre_Rec(TList list, TContent content, char * genre, contentType title, int * flag) {
+static TList addContentByGenre_Rec(TList list, TContent content, char * genre, contentType title, int * flag, TContent * copy) {
     int c;
     if (list == NULL || (c = strcasecmp(genre, list->genre)) < 0) {
-        TList newGenre = malloc(sizeof(TGenre));
+        TList newGenre = calloc(1, sizeof(TGenre));
         if (newGenre == NULL) {
             *flag = MEM_ERROR;
-            return list;
+            return NULL;
         }
-        *flag = copyMedia(list, content, title);
+        *flag = copyContent(list, content, title, copy);
         newGenre->next = list;
         return newGenre;
     } else if (c == 0) {
-        *flag = copyMedia(list, content, title);
+        *flag = copyContent(list, content, title, copy);
         return list;
     }
-    list->next = addMediaByGenre_Rec(list->next, content, genre, title, flag);
+    list->next = addContentByGenre_Rec(list->next, content, genre, title, flag, copy);
     return list;
 }
 
@@ -125,6 +99,57 @@ static int isYearValid (mediaADT media , const unsigned short year)
         return MEM_ERROR;
     return SUCCESS;
 }
+
+int addContent( mediaADT media , TContent content ,unsigned short year , char ** genre , unsigned long numVotes , contentType title){
+    int c, t;
+    if ( (c=isYearValid(media, year)) == INVALIDYEAR_ERROR){
+        return INVALIDYEAR_ERROR;
+    }
+    if ( title != CONTENTTYPE_MOVIE && title != CONTENTTYPE_SERIES){
+        return CONTENTTYPE_ERROR;
+    }
+    int index= POS(year, media->minYear);
+    if ( c == MEM_ERROR){
+        media->size= index+1;
+        media->years=realloc(media->years, sizeof(TYear)*media->size);
+        if (media->years == NULL){
+            return MEM_ERROR;
+        }
+        media->dim++;
+    }
+    media->years[index]= calloc(1, sizeof(struct year));
+    if (media->years[index] == NULL){
+        return MEM_ERROR;
+    }
+    int flag;
+    TContent * copy= malloc(sizeof(TContent));
+    if ( copy == NULL){
+        return MEM_ERROR;
+    }
+    for ( int i=0; genre[i] != NULL; i++) {
+        media->years[index]->genres = addContentByGenre_Rec(media->years[index]->genres, content, genre[i], title, &flag, copy);
+        if (flag == MEM_ERROR){
+            return MEM_ERROR;
+        }
+    }
+    if ( title == CONTENTTYPE_MOVIE){
+        media->years[index]->moviesCount++;
+        if ( numVotes> media->years[index]->bestMovieRating ){
+            media->years[index]->bestMovieRating = numVotes;
+            media->years[index]->bestMovie = copy;
+        }
+
+    }
+    else {
+        media->years[index]->seriesCount++;
+        if (numVotes > media->years[index]->bestSeriesRating) {
+            media->years[index]->bestSeriesRating = numVotes;
+            media->years[index]->bestSeries = copy;
+        }
+    }
+    return SUCCESS;
+}
+
 
 size_t countContentByYear(const mediaADT media, const unsigned short year, contentType MEDIATYPE_ )
 {

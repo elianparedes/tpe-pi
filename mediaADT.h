@@ -25,7 +25,7 @@ typedef struct content{
  */
 mediaADT newMediaADT(const size_t minYear);
 
-int addContent( mediaADT media , unsigned short year , char ** genre , unsigned long numVotes , contentType content);
+int addContent( mediaADT media , TContent content ,unsigned short year , char ** genre , unsigned long numVotes , contentType title);
 
 /**
  * Funcion para obtener la cantidad de peliculas / series para un año.
