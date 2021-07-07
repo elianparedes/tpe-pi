@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define POS(Y,MIN) ( (Y) - (MIN) )
-#define YEAR(P,MIN) ( (P) + (MIN) )
+#define POS(Y,MIN) ((Y) - (MIN))
+#define YEAR(P,MIN) ((P) + (MIN))
 #define IS_VALID_YEAR(Y,MIN) ((Y)>=(MIN))
+
 #define SUCCESS 100
 
-enum errorStates {CONTENTTYPE_ERROR = 200 , MEM_ERROR , INVALIDYEAR_ERROR };
+enum errorStates {CONTENTTYPE_ERROR = 200 , MEM_ERROR , INVALIDYEAR_ERROR, NULLPOINTER_ERROR };
 
 typedef struct genre{
     char * genre;
@@ -64,7 +65,7 @@ static int copyContent(TList list, TContent content, contentType title, TContent
         if ( copyStruct(list->movies, content, list->moviesCount, copy) != MEM_ERROR)
             return CONTENTTYPE_MOVIE;
     }
-    else if ( title == CONTENTTYPE_SERIES){
+    else if (title == CONTENTTYPE_SERIES){
         list->seriesCount++;
         if ( copyStruct(list->series, content, list->seriesCount, copy) != MEM_ERROR)
             return CONTENTTYPE_SERIES;
@@ -150,19 +151,20 @@ int addContent( mediaADT media , TContent content ,unsigned short year , char **
     return SUCCESS;
 }
 
-
-size_t countContentByYear(const mediaADT media, const unsigned short year, contentType MEDIATYPE_ )
+size_t countContentByYear(const mediaADT media, const unsigned short year, contentType CONTENTTYPE_ )
 {
     if (isYearValid(media, year) != SUCCESS )
         return 0;
 
     size_t aux;
-    switch (MEDIATYPE_) {
+    switch (CONTENTTYPE_) {
         case CONTENTTYPE_MOVIE:
             aux = media->years[POS(year, media->minYear)]->moviesCount;
             break;
         case CONTENTTYPE_SERIES:
             aux = media->years[POS(year, media->minYear)]->seriesCount;
+            break;
+        default:
             break;
     }
     return aux;
@@ -185,23 +187,46 @@ static TList searchGenre ( const TList first , const char * genre )
     return searchGenre(first->next , genre) ;
 }
 
-size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre ,  contentType MEDIATYPE_ )
+size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre ,  contentType CONTENTTYPE_ )
 {
-    if (isYearValid(media, year) != SUCCESS )
+    if (isYearValid(media, year) != SUCCESS)
         return INVALIDYEAR_ERROR;
 
     TList auxGenre = searchGenre(media->years[POS(year, media->minYear)]->genres , genre );
     if ( auxGenre == NULL )
-        return 0;
+        return NULLPOINTER_ERROR;
 
     size_t aux;
-    switch (MEDIATYPE_) {
+    switch (CONTENTTYPE_) {
         case CONTENTTYPE_MOVIE:
             aux = auxGenre->moviesCount;
             break;
         case CONTENTTYPE_SERIES:
             aux = auxGenre->seriesCount;
             break;
+        default:
+            break;
     }
+
     return aux;
+}
+
+TContent mostVoted(const mediaADT media, const unsigned short year, contentType CONTENTTYPE_){
+    TContent mostVotedContent  = {0};
+
+    if (isYearValid(media, year) != SUCCESS)
+        return mostVotedContent;
+
+    switch (CONTENTTYPE_) {
+        case CONTENTTYPE_MOVIE:
+            mostVotedContent = *(media->years[POS(year,media->minYear)]->bestMovie);
+            break;
+        case CONTENTTYPE_SERIES:
+            mostVotedContent = *(media->years[POS(year, media->minYear)]->bestSeries);
+            break;
+        default:
+            break;
+    }
+
+    return mostVotedContent;
 }
