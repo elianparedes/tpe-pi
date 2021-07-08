@@ -15,6 +15,9 @@ enum errorStates {
     NULLPOINTER_ERROR
 };
 
+#define CHECK_MEM(PTR) { if( (PTR) == NULL)   \
+                            return MEM_ERROR; }
+
 typedef struct genre{
     char * genre;
     TContent * series;
@@ -54,8 +57,7 @@ mediaADT newMediaADT (const size_t minYear)
     return new;
 }
 
-static TContent * copyStruct(TContent content, size_t index){
-    TContent * contentVec=NULL;
+static TContent * copyStruct(TContent * contentVec, TContent content, size_t index){
     contentVec= realloc(contentVec, sizeof(TContent)*(index+1));
     if ( contentVec == NULL){
         return NULL;
@@ -66,13 +68,13 @@ static TContent * copyStruct(TContent content, size_t index){
 
 static int copyContent(TList genre, TContent content, contentType title){
     if (title == CONTENTTYPE_MOVIE){
-        if ( (genre->movies= copyStruct(content, genre->moviesCount)) != NULL) {
+        if ( (genre->movies= copyStruct(genre->movies, content, genre->moviesCount)) != NULL) {
             genre->moviesCount++;
             return CONTENTTYPE_MOVIE;
         }
     }
     else{
-        if ( (genre->series = copyStruct(content, genre->seriesCount)) != NULL){
+        if ( (genre->series = copyStruct(genre->series, content, genre->seriesCount)) != NULL){
             genre->seriesCount++;
             return CONTENTTYPE_SERIES;
         }
@@ -142,18 +144,14 @@ int addContent( mediaADT media , TContent content ,unsigned short year , char **
     int index= POS(year, media->minYear);
     if ( media->size == 0 || c == MEM_ERROR){
         media->years=realloc(media->years, sizeof(TYear)*(index+1));
-        if (media->years == NULL){
-            return MEM_ERROR;
-        }
-        setNotOcuppied(media->years, media->size, index );
+        CHECK_MEM(media->years);
+        setNotOcuppied(media->years, media->size, index);
         media->size= index+1;
     }
 
     if (media->years[index] == NULL){
         media->years[index]= calloc(1, sizeof(struct year));
-        if (media->years[index] == NULL){
-            return MEM_ERROR;
-        }
+        CHECK_MEM(media->years[index]);
         media->dim++;
     }
     int flag;
@@ -173,6 +171,7 @@ int addContent( mediaADT media , TContent content ,unsigned short year , char **
     }
 
     setRating(media->years[index], content, numVotes, title);
+
     return SUCCESS;
 }
 
@@ -262,7 +261,7 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
  * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
  */
 static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
-    for (size_t i = fromIndex; i > 0; --i) {
+    for (size_t i = fromIndex; i >= 0; --i) {
         if (media->years[i] != NULL) {
             media->currentIndex = i;
             return;
@@ -276,7 +275,7 @@ void toBeginYear(const mediaADT media){
 }
 
 int hasNextYear(const mediaADT media){
-    return media->currentIndex > 0;
+    return media->currentIndex < media->size;
 }
 
 unsigned short nextYear(const mediaADT media){
