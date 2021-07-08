@@ -4,11 +4,16 @@
 
 #define POS(Y,MIN) ((Y) - (MIN))
 #define YEAR(P,MIN) ((P) + (MIN))
-#define IS_VALID_YEAR(Y,MIN) ((Y)>=(MIN))
+#define IS_VALID_YEAR(Y,MIN) ((Y) >= (MIN))
 
 #define SUCCESS 100
 
-enum errorStates {CONTENTTYPE_ERROR = 200 , MEM_ERROR , INVALIDYEAR_ERROR, NULLPOINTER_ERROR };
+enum errorStates {
+    CONTENTTYPE_ERROR = 200,
+    MEM_ERROR,
+    INVALIDYEAR_ERROR,
+    NULLPOINTER_ERROR
+};
 
 typedef struct genre{
     char * genre;
@@ -35,7 +40,7 @@ typedef struct year * TYear;
 
 typedef struct mediaCDT{
     TYear * years;
-    size_t currentYear; //Iterador por año
+    size_t currentIndex; //Iterador por año
     size_t minYear;     //Minimo año posible
     size_t dim;   // cant de memoria ocupada
     size_t size; // cant memoria reservada
@@ -183,7 +188,7 @@ size_t countContentByGenre(const mediaADT media, const unsigned short year, cons
     return aux;
 }
 
-TContent mostVoted(const mediaADT media, const unsigned short year, contentType CONTENTTYPE_){
+TContent mostVoted(const mediaADT media, const unsigned short year, const contentType CONTENTTYPE_){
     TContent mostVotedContent  = {0};
 
     if (isYearValid(media, year) != SUCCESS)
@@ -199,4 +204,36 @@ TContent mostVoted(const mediaADT media, const unsigned short year, contentType 
     }
 
     return mostVotedContent;
+}
+
+/**
+ * Función auxiliar de iterador que permite coloca al currentIndex en el siguiente año ocupado/válido.
+ * @param media ADT creado para el manejo de películas/series.
+ * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
+ */
+static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex){
+    for (size_t i = fromIndex; i < media->size ; ++i) {
+        if (media->years[i] != NULL){
+            media->currentIndex = i;
+            return;
+        }
+    }
+}
+
+void toBeginYear(const mediaADT media){
+    nextOcuppiedYear(media, 0);
+}
+
+int hasNextYear(const mediaADT media){
+    return media->currentIndex < media->size;
+}
+
+unsigned short nextYear(const mediaADT media){
+    if (hasNextYear(media)){
+        return INVALIDYEAR_ERROR;
+    }
+
+    unsigned short year = YEAR(media->currentIndex, media->minYear);
+    nextOcuppiedYear(media, media->currentIndex + 1);
+    return year;
 }
