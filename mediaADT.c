@@ -8,14 +8,6 @@
 
 #define SUCCESS 100   /**< @def Constante númerica para indicar que una operación se realizó exitosamente */
 
-enum errorStates {
-    CONTENTTYPE_ERROR = 200,
-    MEM_ERROR,
-    INVALIDYEAR_ERROR,
-    NULLPOINTER_ERROR,
-    RANGE_ERROR
-};
-
 #define CHECK_MEM(PTR) { if( (PTR) == NULL)   \
                             return MEM_ERROR; }
 
@@ -273,7 +265,7 @@ static TList searchGenre ( const TList first , const char * genre )
         return NULL;
     if ( c == 0 )
         return first;
-    return searchGenre(first->next , genre) ;
+    return searchGenre(first->next , genre);
 }
 
 size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre ,  contentType CONTENTTYPE_ )
