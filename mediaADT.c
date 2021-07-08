@@ -50,7 +50,7 @@ mediaADT newMediaADT (const size_t minYear)
 }
 
 static int copyStruct(TContent * mediaVec, TContent content, size_t index, TContent * copy){
-    mediaVec= realloc(mediaVec, sizeof(TContent)*index);
+    mediaVec= realloc(mediaVec, sizeof(TContent)*(index+1));
     if ( mediaVec == NULL){
         return MEM_ERROR;
     }
@@ -61,14 +61,16 @@ static int copyStruct(TContent * mediaVec, TContent content, size_t index, TCont
 
 static int copyContent(TList list, TContent content, contentType title, TContent * copy){
     if (title == CONTENTTYPE_MOVIE){
-        list->moviesCount++;
-        if ( copyStruct(list->movies, content, list->moviesCount, copy) != MEM_ERROR)
+        if ( copyStruct(list->movies, content, list->moviesCount, copy) != MEM_ERROR) {
+            list->moviesCount++;
             return CONTENTTYPE_MOVIE;
+        }
     }
-    else if (title == CONTENTTYPE_SERIES){
-        list->seriesCount++;
-        if ( copyStruct(list->series, content, list->seriesCount, copy) != MEM_ERROR)
+    else{
+        if ( copyStruct(list->series, content, list->seriesCount, copy) != MEM_ERROR) {
+            list->seriesCount++;
             return CONTENTTYPE_SERIES;
+        }
     }
     return MEM_ERROR;
 }
@@ -81,7 +83,8 @@ static TList addContentByGenre_Rec(TList list, TContent content, char * genre, c
             *flag = MEM_ERROR;
             return NULL;
         }
-        *flag = copyContent(list, content, title, copy);
+        newGenre->genre = genre;
+        *flag = copyContent(newGenre, content, title, copy);
         newGenre->next = list;
         return newGenre;
     } else if (c == 0) {
@@ -94,7 +97,7 @@ static TList addContentByGenre_Rec(TList list, TContent content, char * genre, c
 
 static int isYearValid (mediaADT media , const unsigned short year)
 {
-    if (IS_VALID_YEAR(year, media->minYear))
+    if (!IS_VALID_YEAR(year, media->minYear))
         return INVALIDYEAR_ERROR;
     if ( year > YEAR(media->size-1,media->minYear))
         return MEM_ERROR;
@@ -102,7 +105,7 @@ static int isYearValid (mediaADT media , const unsigned short year)
 }
 
 int addContent( mediaADT media , TContent content ,unsigned short year , char ** genre , unsigned long numVotes , contentType title){
-    int c, t;
+    int c;
     if ( (c=isYearValid(media, year)) == INVALIDYEAR_ERROR){
         return INVALIDYEAR_ERROR;
     }
@@ -116,8 +119,8 @@ int addContent( mediaADT media , TContent content ,unsigned short year , char **
         if (media->years == NULL){
             return MEM_ERROR;
         }
-        media->dim++;
     }
+    media->dim++;
     media->years[index]= calloc(1, sizeof(struct year));
     if (media->years[index] == NULL){
         return MEM_ERROR;
