@@ -36,7 +36,21 @@ typedef struct content{
  */
 mediaADT newMediaADT(const size_t minYear);
 
-int addContent( mediaADT media , TContent content ,unsigned short year , char ** genre , unsigned long numVotes , contentType title);
+/**
+ * @brief Función que añade película/serie a un media ADT.
+ *
+ * @param media Media ADT creado para el manejo de películas/series.
+ * @param content Contenido que será añadido al ADT.
+ * @param year Año en el que comenzó la película/serie.
+ * @param genre Vector de generos de la película/serie.
+ * @param numVotes Cantidad de votos de la película/ serie.
+ * @param title Indica si se añadirá una película o una serie.
+ * @return 1 si "content" se añadió exitosamente, MEM_ERROR si se produjo un error de memoria, INVALIDYEAR_ERROR si variable
+ * "year" es menor al año mínimo que acepta el TAD o CONTENTTYPE_ERROR si variable "title" no corresponde ni a una serie
+ * ni a una película.
+ *
+ */
+int addContent( mediaADT media , const TContent content ,const unsigned short year , const char ** genre , const unsigned long numVotes , const contentType title);
 
 /**
  * @brief Función para obtener la cantidad de peliculas/series para un año.
@@ -108,5 +122,12 @@ int hasNextYear(const mediaADT media);
  * @return Año válido siguiente del iterador.
  */
 unsigned short nextYear(const mediaADT media);
+
+/**
+ * @brief Función que libera los recursos reservados por mediaADT.
+ *
+ * @param Media ADT creado para el manejo de películas/series.
+ */
+void freeMediaADT(mediaADT media);
 
 #endif //TPEFINAL_MEDIAADT_H
