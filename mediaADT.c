@@ -12,7 +12,8 @@ enum errorStates {
     CONTENTTYPE_ERROR = 200,
     MEM_ERROR,
     INVALIDYEAR_ERROR,
-    NULLPOINTER_ERROR
+    NULLPOINTER_ERROR,
+    RANGE_ERROR
 };
 
 #define CHECK_MEM(PTR) { if( (PTR) == NULL)   \
@@ -52,6 +53,7 @@ typedef struct year * TYear;
  */
 typedef struct mediaCDT{
     TYear * years;              /**< Vector de punteros a TYear para guardar las películas y series por año             */
+    TList currentGenre;         /**< Iterador por género                                                                */
     size_t currentIndex;        /**< Iterador por años                                                                  */
     size_t minYear;             /**< Año mínimo de comienzo de película/serie que aceptará el TAD para añadir contenido */
     size_t dim;                 /**< Cantidad de años ocupados (es decir, que contienen al menos una película/serie)    */
@@ -319,21 +321,22 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
 }
 
 /**
- * Función auxiliar de iterador que permite coloca al currentIndex en el siguiente año ocupado/válido.
+ * Función auxiliar de iterador que coloca al currentIndex en el siguiente año ocupado/válido.
  * @param media ADT creado para el manejo de películas/series.
  * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
  */
-static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex){
-    for (size_t i = fromIndex; i < media->size ; ++i) {
-        if (media->years[i] != NULL){
+static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
+    for (size_t i = fromIndex; i >= 0; --i) {
+        if (media->years[i] != NULL) {
             media->currentIndex = i;
             return;
         }
     }
+    media->currentIndex = 0;
 }
 
 void toBeginYear(const mediaADT media){
-    nextOcuppiedYear(media, 0);
+    nextOcuppiedYear(media, media->size - 1);
 }
 
 int hasNextYear(const mediaADT media){
@@ -341,12 +344,12 @@ int hasNextYear(const mediaADT media){
 }
 
 unsigned short nextYear(const mediaADT media){
-    if (hasNextYear(media)){
-        return INVALIDYEAR_ERROR;
+    if (!hasNextYear(media)){
+        return RANGE_ERROR;
     }
 
     unsigned short year = YEAR(media->currentIndex, media->minYear);
-    nextOcuppiedYear(media, media->currentIndex + 1);
+    nextOcuppiedYear(media, media->currentIndex - 1);
     return year;
 }
 
@@ -388,4 +391,32 @@ void freeMediaADT(mediaADT media){
     }
     free(media->years);
     free(media);
+}
+
+int toBeginGenre (const mediaADT media , const unsigned short year )
+{
+    // Se verifica que el año sea valido
+    if (isYearValid(media,year) != SUCCESS )
+        return INVALIDYEAR_ERROR;
+
+    TYear aux = media->years[POS(year,media->minYear)];
+    //Se verifica que el año pedido tenga contenido
+    CHECK_MEM(aux)
+
+    media->currentGenre = aux->genres;
+    return 1;
+}
+
+int hasNextGenre ( const mediaADT media )
+{
+    return media->currentGenre != NULL;
+}
+
+char * nextGenre ( const mediaADT media )
+{
+    if ( !hasNextGenre(media) )
+        return NULL;
+    char * aux = media->currentGenre->genre;
+    media->currentGenre = media->currentGenre->next;
+    return aux;
 }

@@ -61,7 +61,7 @@ int addContent( mediaADT media , const TContent content ,const unsigned short ye
  *        Distinguiendo entre pelicula o serie.
  * @return 0 si el año es invalido o si no hay registro de peliculas/series para ese año.
  */
-size_t countContentByYear(const mediaADT media, const unsigned short year, contentType MEDIATYPE_);
+size_t countContentByYear(const mediaADT media, const unsigned short year, contentType CONTENTTYPE_);
 
 /**
  * @brief Función para obtener la cantidad de peliculas/series para un genero en especifico de un año en especifico
@@ -73,7 +73,7 @@ size_t countContentByYear(const mediaADT media, const unsigned short year, conte
  *        Distinguiendo entre pelicula o serie.
  * @return 0 si el año o el genero son invalido o si no hay registro de peliculas/series para ese género.
  */
-size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre, contentType MEDIATYPE_ );
+size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre, contentType CONTENTTYPE_ );
 
 /**
  * @brief Función que devuelve la pelicula/serie con mayor cantidad de votos del año.
@@ -86,7 +86,7 @@ size_t countContentByGenre(const mediaADT media, const unsigned short year, cons
 TContent mostVoted(const mediaADT media, const unsigned short year, const contentType CONTENTTYPE_);
 
 /*******************************************************************************
- *  @section Iteración
+ *  @section Iteración por año
  *  @brief Funciones de iteración para que el usuario consulte años válidos
  *  en orden cronológico descendente (Desde el más actual hasta los anteriores).
  *
@@ -118,8 +118,15 @@ void toBeginYear(const mediaADT media);
 int hasNextYear(const mediaADT media);
 
 /**
+ * @brief Pasa al siguiente año en el iterador
+ *
+ * @details Se debe utilizar en combinacion de la funcion hasNextYear . En caso
+ * de que no se verifique si hay un año siguiente valido en el iterador y se llame
+ * a esta funcion, retornara RANGE_ERROR indicando que no hay un año valido.
+ *
  * @param media ADT creado para el manejo de películas/series.
  * @return Año válido siguiente del iterador.
+ * @return RANGE_ERROR Si no es un año valido siguiente del iterador
  */
 unsigned short nextYear(const mediaADT media);
 
@@ -129,5 +136,55 @@ unsigned short nextYear(const mediaADT media);
  * @param Media ADT creado para el manejo de películas/series.
  */
 void freeMediaADT(mediaADT media);
+
+/*******************************************************************************
+ *  @section Iteración por genero
+ *  @brief Funciones de iteración para que el usuario consulte generos válidos para un año,
+ *  ordenados alfabeticamente.
+ *
+ *  @details Durante la iteración, el usuario recibirá generos validos los cuales
+ *  luego podrá utilizar para obtener la información correspondiente con las
+ *  demas funciones de este contrato.
+ *  Si se desea comenzar la iteración o no se puede avanzar en la misma,
+ *  el usuario deberá volver a ejecutar la funcion toBeginGenre()
+ *  para comenzar el recorrido desde el inicio , indicando en ella el año en que
+ *  se deasea iterar por genero.
+ *
+ *  @see toBeginGenre()
+ *  @see hasNextGenre()
+ *  @see nextGenre()
+********************************************************************************/
+
+
+/**
+ * @brief Inicializa el iterador en el primer genero en orden alfabetico.
+ *
+ * @param media ADT creado para el manejo de películas/series.
+ * @param year año para el cual se desea iterar los generos validos de series y peliculas
+ * @return INVALIDYEAR_ERROR Si el año pasado como argumento es invalido
+ * @return 1 Si el iterador fue seteado correctamente
+ */
+int toBeginGenre (const mediaADT media , const unsigned short year );
+
+/**
+ * @brief Consulta si existe un genero valido siguiente.
+ *
+ * @param media ADT creado para el manejo de películas/series.
+ * @return 1 si existe un genero valido siguiente del iterador.
+ */
+int hasNextGenre ( const mediaADT media );
+
+/**
+ * @brief Pasa al siguiente genero en el iterador
+ *
+ * @details Se debe utilizar en combinacion de la funcion hasNextGenre . En caso de que no
+ * se verifique si hay un genero siguiente valido en el iterador y se llame a esta funcion ,
+ *  etornara NULL indicando que no hay un genero valido.
+ *
+ * @param media ADT creado para el manejo de películas/series.
+ * @return genero valido siguiente del iterador.
+ * @return NULL Si no hay un genero valido en el iterador.
+ */
+char * nextGenre ( const mediaADT media );
 
 #endif //TPEFINAL_MEDIAADT_H
