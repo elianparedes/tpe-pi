@@ -28,8 +28,8 @@ typedef TGenre * TList;
 
 struct year {
     TList genres;
-    TContent * bestMovie;
-    TContent * bestSeries;
+    TContent bestMovie;
+    TContent bestSeries;
     size_t bestMovieRating;
     size_t bestSeriesRating;
     size_t moviesCount;
@@ -54,50 +54,50 @@ mediaADT newMediaADT (const size_t minYear)
     return new;
 }
 
-static int copyStruct(TContent * mediaVec, TContent content, size_t index, TContent * copy){
-    mediaVec= realloc(mediaVec, sizeof(TContent)*(index+1));
-    if ( mediaVec == NULL){
-        return MEM_ERROR;
+static TContent * copyStruct(TContent content, size_t index){
+    TContent * contentVec=NULL;
+    contentVec= realloc(contentVec, sizeof(TContent)*(index+1));
+    if ( contentVec == NULL){
+        return NULL;
     }
-    mediaVec[index]=content;
-    *copy= content;
-    return SUCCESS;
+    contentVec[index]=content;
+    return contentVec;
 }
 
-static int copyContent(TList list, TContent content, contentType title, TContent * copy){
+static int copyContent(TList genre, TContent content, contentType title){
     if (title == CONTENTTYPE_MOVIE){
-        if ( copyStruct(list->movies, content, list->moviesCount, copy) != MEM_ERROR) {
-            list->moviesCount++;
+        if ( (genre->movies= copyStruct(content, genre->moviesCount)) != NULL) {
+            genre->moviesCount++;
             return CONTENTTYPE_MOVIE;
         }
     }
     else{
-        if ( copyStruct(list->series, content, list->seriesCount, copy) != MEM_ERROR) {
-            list->seriesCount++;
+        if ( (genre->series = copyStruct(content, genre->seriesCount)) != NULL){
+            genre->seriesCount++;
             return CONTENTTYPE_SERIES;
         }
     }
     return MEM_ERROR;
 }
 
-static TList addContentByGenre_Rec(TList list, TContent content, char * genre, contentType title, int * flag, TContent * copy) {
+static TList addContentByGenre_Rec(TList listG, TContent content, char * genre, contentType title, int * flag) {
     int c;
-    if (list == NULL || (c = strcasecmp(genre, list->genre)) < 0) {
+    if (listG == NULL || (c = strcasecmp(genre, listG->genre)) < 0) {
         TList newGenre = calloc(1, sizeof(TGenre));
         if (newGenre == NULL) {
             *flag = MEM_ERROR;
             return NULL;
         }
-        newGenre->genre = genre;
-        *flag = copyContent(newGenre, content, title, copy);
-        newGenre->next = list;
+        newGenre->genre=genre;
+        *flag = copyContent(newGenre, content, title);
+        newGenre->next = listG;
         return newGenre;
     } else if (c == 0) {
-        *flag = copyContent(list, content, title, copy);
-        return list;
+        *flag = copyContent(listG, content, title);
+        return listG;
     }
-    list->next = addContentByGenre_Rec(list->next, content, genre, title, flag, copy);
-    return list;
+    listG->next = addContentByGenre_Rec(listG->next, content, genre, title, flag);
+    return listG;
 }
 
 static int isYearValid (mediaADT media , const unsigned short year)
@@ -109,6 +109,28 @@ static int isYearValid (mediaADT media , const unsigned short year)
     return SUCCESS;
 }
 
+static void setNotOcuppied ( TYear * years , size_t from , size_t to ){
+    while ( from <= to )
+    {
+        years[from++] = NULL;
+    }
+}
+
+static void setRating(TYear year, TContent content, unsigned long numVotes, contentType title){
+    if ( title == CONTENTTYPE_MOVIE){
+        if ( numVotes > year->bestMovieRating){
+            year->bestMovieRating= numVotes;
+            year->bestMovie= content;
+        }
+    }
+    else{
+        if (numVotes > year->bestSeriesRating){
+            year->bestSeriesRating= numVotes;
+            year->bestSeries = content;
+        }
+    }
+}
+
 int addContent( mediaADT media , TContent content ,unsigned short year , char ** genre , unsigned long numVotes , contentType title){
     int c;
     if ( (c=isYearValid(media, year)) == INVALIDYEAR_ERROR){
@@ -118,44 +140,39 @@ int addContent( mediaADT media , TContent content ,unsigned short year , char **
         return CONTENTTYPE_ERROR;
     }
     int index= POS(year, media->minYear);
-    if ( c == MEM_ERROR){
-        media->size= index+1;
-        media->years=realloc(media->years, sizeof(TYear)*media->size);
+    if ( media->size == 0 || c == MEM_ERROR){
+        media->years=realloc(media->years, sizeof(TYear)*(index+1));
         if (media->years == NULL){
             return MEM_ERROR;
         }
+        setNotOcuppied(media->years, media->size, index);
+        media->size= index+1;
     }
-    media->dim++;
-    media->years[index]= calloc(1, sizeof(struct year));
+
     if (media->years[index] == NULL){
-        return MEM_ERROR;
+        media->years[index]= calloc(1, sizeof(struct year));
+        if (media->years[index] == NULL){
+            return MEM_ERROR;
+        }
+        media->dim++;
     }
     int flag;
-    TContent * copy= malloc(sizeof(TContent));
-    if ( copy == NULL){
-        return MEM_ERROR;
-    }
+    TContent * copy=NULL;
     for ( int i=0; genre[i] != NULL; i++) {
-        media->years[index]->genres = addContentByGenre_Rec(media->years[index]->genres, content, genre[i], title, &flag, copy);
+        media->years[index]->genres = addContentByGenre_Rec(media->years[index]->genres, content, genre[i], title, &flag);
         if (flag == MEM_ERROR){
             return MEM_ERROR;
         }
     }
-    if ( title == CONTENTTYPE_MOVIE){
-        media->years[index]->moviesCount++;
-        if ( numVotes> media->years[index]->bestMovieRating ){
-            media->years[index]->bestMovieRating = numVotes;
-            media->years[index]->bestMovie = copy;
-        }
 
+    if ( title == CONTENTTYPE_MOVIE){
+        (media->years[index]->moviesCount)++;
     }
     else {
-        media->years[index]->seriesCount++;
-        if (numVotes > media->years[index]->bestSeriesRating) {
-            media->years[index]->bestSeriesRating = numVotes;
-            media->years[index]->bestSeries = copy;
-        }
+        (media->years[index]->seriesCount++);
     }
+
+    setRating(media->years[index], content, numVotes, title);
     return SUCCESS;
 }
 
@@ -227,10 +244,10 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
 
     switch (CONTENTTYPE_) {
         case CONTENTTYPE_MOVIE:
-            mostVotedContent = *(media->years[POS(year,media->minYear)]->bestMovie);
+            mostVotedContent = media->years[POS(year,media->minYear)]->bestMovie;
             break;
         case CONTENTTYPE_SERIES:
-            mostVotedContent = *(media->years[POS(year, media->minYear)]->bestSeries);
+            mostVotedContent = media->years[POS(year, media->minYear)]->bestSeries;
             break;
         default:
             break;
