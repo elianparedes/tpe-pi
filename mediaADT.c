@@ -12,7 +12,8 @@ enum errorStates {
     CONTENTTYPE_ERROR = 200,
     MEM_ERROR,
     INVALIDYEAR_ERROR,
-    NULLPOINTER_ERROR
+    NULLPOINTER_ERROR,
+    RANGE_ERROR
 };
 
 #define CHECK_MEM(PTR) { if( (PTR) == NULL)   \
@@ -31,6 +32,7 @@ typedef TGenre * TList;
 
 struct year {
     TList genres;
+
     TContent bestMovie;
     TContent bestSeries;
     size_t bestMovieRating;
@@ -43,6 +45,7 @@ typedef struct year * TYear;
 
 typedef struct mediaCDT{
     TYear * years;
+    TList currentGenre; // Iterador por genero
     size_t currentIndex; //Iterador por año
     size_t minYear;     //Minimo año posible
     size_t dim;   // cant de memoria ocupada
@@ -280,10 +283,38 @@ int hasNextYear(const mediaADT media){
 
 unsigned short nextYear(const mediaADT media){
     if (!hasNextYear(media)){
-        return 0;
+        return RANGE_ERROR;
     }
 
     unsigned short year = YEAR(media->currentIndex, media->minYear);
     nextOcuppiedYear(media, media->currentIndex - 1);
     return year;
+}
+
+int toBeginGenre (const mediaADT media , const unsigned short year )
+{
+    // Se verifica que el año sea valido
+    if (isYearValid(media,year) != SUCCESS )
+        return INVALIDYEAR_ERROR;
+
+    TYear aux = media->years[POS(year,media->minYear)];
+    //Se verifica que el año pedido tenga contenido
+    CHECK_MEM(aux)
+
+    media->currentGenre = aux->genres;
+    return 1;
+}
+
+int hasNextGenre ( const mediaADT media )
+{
+    return media->currentGenre != NULL;
+}
+
+char * nextGenre ( const mediaADT media )
+{
+    if ( !hasNextGenre(media) )
+        return NULL;
+    char * aux = media->currentGenre->genre;
+    media->currentGenre = media->currentGenre->next;
+    return aux;
 }
