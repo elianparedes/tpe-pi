@@ -145,7 +145,7 @@ int addContent( mediaADT media , TContent content ,unsigned short year , char **
         if (media->years == NULL){
             return MEM_ERROR;
         }
-        setNotOcuppied(media->years, media->size, index);
+        setNotOcuppied(media->years, media->size, index );
         media->size= index+1;
     }
 
@@ -261,17 +261,18 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
  * @param media ADT creado para el manejo de películas/series.
  * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
  */
-static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex){
-    for (size_t i = fromIndex; i >= 0 ; --i) {
-        if (media->years[i] != NULL){
+static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
+    for (size_t i = fromIndex; i > 0; --i) {
+        if (media->years[i] != NULL) {
             media->currentIndex = i;
             return;
         }
     }
+    media->currentIndex = 0;
 }
 
 void toBeginYear(const mediaADT media){
-    nextOcuppiedYear(media, media->size);
+    nextOcuppiedYear(media, media->size - 1);
 }
 
 int hasNextYear(const mediaADT media){
@@ -279,8 +280,8 @@ int hasNextYear(const mediaADT media){
 }
 
 unsigned short nextYear(const mediaADT media){
-    if (hasNextYear(media)){
-        return INVALIDYEAR_ERROR;
+    if (!hasNextYear(media)){
+        return 0;
     }
 
     unsigned short year = YEAR(media->currentIndex, media->minYear);
