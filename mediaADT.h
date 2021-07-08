@@ -11,6 +11,17 @@ typedef enum {
     CONTENTTYPE_SERIES     /**< @enum Identificador contenido tipo Serie    */
 } contentType;
 
+/**
+ * @brief Códigos para manejo de errores.
+ */
+enum errorStates {
+    CONTENTTYPE_ERROR = 200, /**< @enum Tipo de contenido inválido            */
+    MEM_ERROR,               /**< @enum Error en asignación de memoria        */
+    INVALIDYEAR_ERROR,       /**< @enum Año inexistente o fuera de rango      */
+    NULLPOINTER_ERROR,       /**< @enum Acceso inválido                       */
+    RANGE_ERROR              /**< @enum El iterador no puede avanzar          */
+};
+
 typedef struct mediaCDT * mediaADT;
 
 /**
@@ -18,7 +29,7 @@ typedef struct mediaCDT * mediaADT;
  * que desea guardar.
  */
 typedef struct content{
-    char * titleType;               /**< Tipo de contenido (película, serie, etc.)       */
+    char * titleType;               /**< Tipo de contenido (película, serie)             */
     char * primaryTitle;            /**< Título Original                                 */
     char ** genres;                 /**< Lista de generos correspondientes al contenido  */
     unsigned short startYear;       /**< El año de lanzamiento o comienzo de emisión     */
@@ -138,7 +149,7 @@ unsigned short nextYear(const mediaADT media);
 void freeMediaADT(mediaADT media);
 
 /*******************************************************************************
- *  @section Iteración por genero
+ *  @section Iteración por género
  *  @brief Funciones de iteración para que el usuario consulte generos válidos para un año,
  *  ordenados alfabeticamente.
  *
@@ -154,7 +165,6 @@ void freeMediaADT(mediaADT media);
  *  @see hasNextGenre()
  *  @see nextGenre()
 ********************************************************************************/
-
 
 /**
  * @brief Inicializa el iterador en el primer genero en orden alfabetico.
