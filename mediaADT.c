@@ -130,7 +130,8 @@ static TList addContentByGenre_Rec(TList listG, const TContent content, const ch
             *flag = MEM_ERROR;
             return NULL;
         }
-        newGenre->genre=genre;
+        newGenre->genre=malloc(strlen(genre)+1);
+        strcpy(newGenre->genre, genre);
         *flag = copyContent(newGenre, content, title);
         newGenre->next = listG;
         return newGenre;
@@ -366,6 +367,7 @@ static void freeGenres_Rec(TList genre){
     freeGenres_Rec(genre->next);
     free(genre->movies);
     free(genre->series);
+    free(genre->genre);
     free(genre);
 }
 
