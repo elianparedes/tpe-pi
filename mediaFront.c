@@ -217,6 +217,7 @@ void errorManager ( int error , mediaADT media )
 }
 
 void query1(mediaADT media, char * filePath){
+    ///Se crea el archivo, se abre en modo "write" para escribir sobre el mismo.
     FILE * file=fopen(filePath, "w");
 
     ///Se agrega el header correspondiente al archivo.
