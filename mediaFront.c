@@ -3,6 +3,8 @@
 #include <string.h>
 #define MAX_GENRES 15
 #define BUFFER_SIZE 128
+#define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp(S1,S2)==0) \
+                                                  return TYPE;}
 
 int getDataFromFile(mediaADT media, const char * filePath);
 char ** createGenresVec(char ** vec, char * string);
@@ -14,6 +16,24 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+/**
+ * @brief Determina si el contenido es una pelicula , serie u otro.
+ *
+ * @details Si no es una serie o una pelicula , devuelve CONTENTTYPE_ERROR indicando que no es
+ * un contentType esperado
+ *
+ * @param content es el contenido del cual se determinara su contentType
+ * @return CONTENTTYPE_MOVIE si es un pelicula
+ * @return CONTENTTYPE_SERIES si es una serie
+ * @return CONTENTTYPE_ERROR si no es serie o pelicula
+ */
+contentType getContentType ( TContent content )
+{
+    COMPARE_TYPES(content.titleType,"movie",CONTENTTYPE_MOVIE)
+    COMPARE_TYPES(content.titleType,"tvSeries",CONTENTTYPE_SERIES)
+    return (contentType)CONTENTTYPE_ERROR;
+}
+
 int getDataFromFile(mediaADT media, const char * filePath){
 
     char buffer[BUFFER_SIZE];
@@ -22,7 +42,10 @@ int getDataFromFile(mediaADT media, const char * filePath){
     fgets(buffer, BUFFER_SIZE, file);
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
-
+        contentType aux = getContentType(new);
+        if ( aux == CONTENTTYPE_ERROR )
+            //TENER EL CUIDADO DE SI HAY QUE LIBERAR O NO
+            exit(EXIT_FAILURE);
         addContent(media, new, new.startYear, new.genres, new.numVotes, CONTENTTYPE_MOVIE);
         free(new.genres);
     }
