@@ -1,36 +1,38 @@
 #include "mediaADT.h"
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
-#define POS(Y,MIN) ((Y) - (MIN))            /**< @def Macro para obtener posición en vector de punteros a TYear */
-#define YEAR(P,MIN) ((P) + (MIN))           /**< @def Macro para obtener el año a partir de un índice */
-#define IS_VALID_YEAR(Y,MIN) ((Y) >= (MIN)) /**< @def Macro que devuelve 1 si el año es válido para operar en el TAD o 0 si no lo es */
+#define POS(Y,MIN) ((Y) - (MIN))            /**< @def Macro para obtener posicion en vector de punteros a TYear */
+#define YEAR(P,MIN) ((P) + (MIN))           /**< @def Macro para obtener el año a partir de un indice */
+#define IS_VALID_YEAR(Y,MIN) ((Y) >= (MIN)) /**< @def Macro que devuelve 1 si el año es valido para operar en el TAD o 0 si no lo es */
 
-#define SUCCESS 100   /**< @def Constante númerica para indicar que una operación se realizó exitosamente */
+#define SUCCESS 100   /**< @def Constante numerica para indicar que una operacion se realizo exitosamente */
 
+/**< @def Macro que devuelve MEM_ERROR si el puntero no se asigno correctamente (si es NULL) */
 #define CHECK_MEM(PTR) { if( (PTR) == NULL)   \
                             return MEM_ERROR; }
 
 /**
- *  @brief Struct para manejar películas y series en un género determinado
+ *  @brief Struct para manejar películas y series en un genero determinado
  */
 typedef struct genre{
-    char genre[MAX_GENRE_SIZE]; /**< Nombre del género                                     */
+    char genre[MAX_GENRE_SIZE]; /**< Nombre del genero                                     */
     TContent * series;          /**< Vector que contiene las series añadidas               */
-    TContent * movies;          /**< Vector que contiene las películas añadidas            */
-    size_t moviesCount;         /**< Cantidad de películas añadidas en el género           */
-    size_t seriesCount;         /**< Cantidad de series añadidas en el género              */
+    TContent * movies;          /**< Vector que contiene las peliculas añadidas            */
+    size_t moviesCount;         /**< Cantidad de peliculas añadidas en el genero           */
+    size_t seriesCount;         /**< Cantidad de series añadidas en el genero              */
     struct genre * next;        /**< Puntero al siguiente struct genre (para formar lista) */
 } TGenre;
 
 typedef TGenre * TList;
 
 /**
- * @brief Struct para manejar películas y series en un año determinado
+ * @brief Struct para manejar peliculas y series en un año determinado
  */
 struct year {
-    TList genres;              /**< Lista ordenada alfabéticamente por géneros de películas y series */
-    TContent bestMovie;        /**< Película con mayor cantidad de votos en el año                   */
+    TList genres;              /**< Lista ordenada alfabeticamente por géneros de películas y series */
+    TContent bestMovie;        /**< Pelicula con mayor cantidad de votos en el año                   */
     TContent bestSeries;       /**< Serie con mayor cantidad de votos en el año                      */
     size_t bestMovieRating;    /**< Cantidad de votos de bestMovie                                   */
     size_t bestSeriesRating;   /**< Cantidad de votos de bestSeries                                  */
@@ -41,13 +43,13 @@ struct year {
 typedef struct year * TYear;
 
 /**
- * @brief TAD para el manejo de películas y series
+ * @brief TAD para el manejo de peliculas y series
  */
 typedef struct mediaCDT{
     TYear * years;              /**< Vector de punteros a TYear para guardar las películas y series por año             */
-    TList currentGenre;         /**< Iterador por género                                                                */
+    TList currentGenre;         /**< Iterador por genero                                                                */
     size_t currentIndex;        /**< Iterador por años                                                                  */
-    size_t minYear;             /**< Año mínimo de comienzo de película/serie que aceptará el TAD para añadir contenido */
+    size_t minYear;             /**< Año minimo de comienzo de pelicula/serie que aceptara el TAD para añadir contenido */
     size_t dim;                 /**< Cantidad de años ocupados (es decir, que contienen al menos una película/serie)    */
     size_t size;                /**< Cantidad total de años reservados en memoria                                       */
 } mediaCDT;
@@ -55,20 +57,25 @@ typedef struct mediaCDT{
 mediaADT newMediaADT (const size_t minYear)
 {
     mediaADT new = calloc(1,sizeof (mediaCDT));
-    //Se setean los extremos del vector dinamico. Inicialmente el extremo superior es igual al inferior
+    /// Se setean los extremos del vector dinamico. Inicialmente el extremo superior es igual al inferior.
     new->minYear = minYear;
     return new;
 }
 
 /**
- * @brief Función auxiliar que copia en un vector una película/serie.
+ * @brief Funcion auxiliar que copia en un vector una pelicula/serie.
  *
- * @param contentVec Vector de punteros a TContent en el que será copiado al final la nueva película/serie.
- * @param content Película/serie que será copiada.
- * @param index Índice del vector en el que será copiado la película/serie.
+ * @details Se reserva memoria a bloques para evitar reallocs cada vez que se ejecute la funcion. A su vez, se le permite
+ * al usuario elegir si desea un bloque mas grande o mas chico. De esta forma, si se añade una gran cantidad de
+ * peliculas y series no se incrementara el tiempo de ejecucion en gran manera.
+ *
+ * @param contentVec Vector de punteros a TContent en el que sera copiado al final la nueva película/serie.
+ * @param content Pelicula/serie que sera copiada.
+ * @param index Indice del vector en el que sera copiado la pelicula/serie.
  * @return Puntero al comienzo del vector.
  */
 static TContent * copyStruct(TContent * contentVec, const TContent content, const size_t index){
+    /// Si el indice llega al bloque de memoria, se expandirá el vector
     if (index % MEM_BLOCK == 0){
         contentVec = realloc(contentVec, sizeof(TContent)*(index + MEM_BLOCK));
         if ( contentVec == NULL){
@@ -80,15 +87,18 @@ static TContent * copyStruct(TContent * contentVec, const TContent content, cons
 }
 
 /**
- * @brief Función auxiliar que añade pelicula/serie dentro de un género, actualizando struct genre para reflejar el
+ * @brief Funcion auxiliar que añade pelicula/serie dentro de un genero, actualizando struct genre para reflejar el
  * contenido añadido.
  *
  * @param genre Puntero a struct genre (TList)
- * @param content Película/serie que será añadida.
+ * @param content Pelicula/serie que será añadida.
  * @param title Indica si el contenido a añadir es una película o una serie.
- * @return CONTENTTYPE_MOVIE si fue añadida una película, CONTENTTYPE_SERIES si fue añadida una serie.
+ * @return CONTENTTYPE_MOVIE si fue añadida una película.
+ * @return CONTENTTYPE_SERIES si fue añadida una serie.
+ * @return MEM_ERROR si se produjo un error de memoria.
  */
 static int copyContent(TList genre, const TContent content, const contentType title){
+    /// Evalua si es una pelicula o una serie y llama a copyStruct
     if (title == CONTENTTYPE_MOVIE){
         if ( (genre->movies= copyStruct(genre->movies, content, genre->moviesCount)) != NULL) {
             genre->moviesCount++;
@@ -105,21 +115,21 @@ static int copyContent(TList genre, const TContent content, const contentType ti
 }
 
 /**
- * @brief Función auxiliar recursiva que añade película/serie en un mediaADT en un año y género determinado.
+ * @brief Funcion auxiliar recursiva que añade película/serie en un mediaADT en un año y genero determinado.
  *
- * @param listG Puntero a struct genre (TList) que contiene las películas/series añadidas dentro de un género en
- * específico, junto a la cantidad añadida de las mismas.
- * @param content Película/serie que será añadida.
- * @param genre Género de la película/serie.
- * @param title Indica si el contenido a añadir es una película o una serie.
- * @param flag Al finalizar la ejecución de la función apuntará a MEM_ERROR si hubo un error de asignación de memoria,
- * CONTENTTYPE_MOVIE si fue añadida una película o CONTENTTYPE_SERIES si fue añadida una serie.
- * @return Puntero a struct genre (TList) al ser una función recursiva.
+ * @param listG Puntero a struct genre (TList) que contiene las peliculas/series añadidas dentro de un genero en
+ * especifico, junto a la cantidad añadida de las mismas.
+ * @param content Pelicula/serie que sera añadida.
+ * @param genre Genero de la pelicula/serie.
+ * @param title Indica si el contenido a añadir es una pelicula o una serie.
+ * @param flag Al finalizar la ejecución de la función apuntará a MEM_ERROR si hubo un error de asignacion de memoria,
+ * CONTENTTYPE_MOVIE si fue añadida una pelicula o CONTENTTYPE_SERIES si fue añadida una serie.
+ * @return Puntero a struct genre (TList) al ser una funcion recursiva.
  */
 static TList addContentByGenre_Rec(TList listG, const TContent content, const char * genre, const contentType title, int * flag) {
     int c;
     if (listG == NULL || (c = strcasecmp(genre, listG->genre)) < 0) {
-        TList newGenre = calloc(1, sizeof(TGenre));
+        TList newGenre = calloc(1, sizeof(TGenre)); /// Si el genero no existia, se crea un nuevo nodo.
         if (newGenre == NULL) {
             *flag = MEM_ERROR;
             return NULL;
@@ -129,7 +139,7 @@ static TList addContentByGenre_Rec(TList listG, const TContent content, const ch
         newGenre->next = listG;
         return newGenre;
 
-    } else if (c == 0) {
+    } else if (c == 0) {                                  /// Si el genero existia, llama directamente a addContent
         *flag = copyContent(listG, content, title);
         return listG;
     }
@@ -138,13 +148,13 @@ static TList addContentByGenre_Rec(TList listG, const TContent content, const ch
 }
 
 /**
- * @brief Función auxiliar que indica mediante distintas constantes si un año es "valido" o no con respecto a un mediaADT.
+ * @brief Funcion auxiliar que indica mediante distintas constantes si un año es "valido" o no con respecto a un mediaADT.
  *
- * @param media Media ADT creado para el manejo de películas/series.
- * @param year Año que será evaluado.
- * @return INVALIDYEAR_ERROR si el año es menor al año mínimo indicado en el mediaADT, MEM_ERROR si el
- * año es mayor a la memoria que fue asignada en el mediaADT y SUCCESS si no se cumple ninguna de las 2 condiciones
- * mencionadas anteriormente.
+ * @param media ADT creado para el manejo de peliculas/series.
+ * @param year Año que sera evaluado.
+ * @return INVALIDYEAR_ERROR si el año es menor al año mínimo indicado en el mediaADT.
+ * @return MEM_ERROR si el año es mayor a la memoria que fue asignada en el mediaADT.
+ * @return SUCCESS si no se cumple ninguna de las 2 condiciones mencionadas anteriormente.
  */
 static int isYearValid (mediaADT media , const unsigned short year)
 {
@@ -155,53 +165,22 @@ static int isYearValid (mediaADT media , const unsigned short year)
     return SUCCESS;
 }
 
-/**
- * @brief Función auxiliar que llena con NULL un vector de tipo TYear * para indicar que no tiene contenido dentro.
- *
- * @param years Vector que será recorrido y llenado con NULL.
- * @param from Indica el comienzo de recorrido.
- * @param to Indica el final de recorrido.
- */
-static void setNotOcuppied ( TYear * years , size_t from , const size_t to ){
-    while ( from <= to )
-    {
-        years[from++] = NULL;
-    }
-}
-
-/**
- * @brief Función auxiliar que actualiza película/serie con mayor cantidad de votos e indica la nueva cantidad en mediaADT.
- *
- * @param year Puntero a struct year que contiene las películas/series añadidas a mediaADT con comienzo en un año
- * determinado.
- * @param content Película/serie que será evaluada con el mediaADT.
- * @param numVotes Cantidad de votos de la película/serie que será evaluada.
- * @param title Indica si el contenido a evaluar es una película o una serie.
- */
-static void setRating(TYear year, const TContent content, const unsigned long numVotes, const contentType title){
-    if ( title == CONTENTTYPE_MOVIE){
-        if ( numVotes > year->bestMovieRating){
-            year->bestMovieRating = numVotes;
-            year->bestMovie = content;
-        }
-    }
-    else{
-        if (numVotes > year->bestSeriesRating){
-            year->bestSeriesRating= numVotes;
-            year->bestSeries = content;
-        }
-    }
-}
-
-int addContent( mediaADT media , const TContent content , const unsigned short year , const char ** genre , const unsigned long numVotes , const contentType title){
+int addContent( mediaADT media , const TContent content , const unsigned short year , char ** genre , const unsigned long numVotes , const contentType title){
     int c;
+    /// Se valida si el año pasado como parametro es válido dentro del mediaADT
     if ( (c=isYearValid(media, year)) == INVALIDYEAR_ERROR){
         return INVALIDYEAR_ERROR;
     }
+
+    /// Se valida si el contenido a añadir es una pelicula o serie
     if ( title != CONTENTTYPE_MOVIE && title != CONTENTTYPE_SERIES){
         return CONTENTTYPE_ERROR;
     }
     int index= POS(year, media->minYear);
+
+    /// Si es la primera vez que se añade una pelicula/serie, o el año pasado como parametro es mayor al que puede
+    /// acceder el vector de años en el ADT (no se puede acceder al indice), se reserva memoria para los años y se
+    /// inicializa con ceros los campos de bestMovieRating, bestSeriesRating, moviesCount y seriesCount para los mismos
     if ( media->size == 0 || c == MEM_ERROR){
         media->years=realloc(media->years, sizeof(TYear)*(index+1));
         CHECK_MEM(media->years);
@@ -209,6 +188,7 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
         media->size= index+1;
     }
 
+    /// Si no fue añadida una pelicula/serie al año, se reserva espacio
     if (media->years[index] == NULL){
         media->years[index]= calloc(1, sizeof(struct year));
         CHECK_MEM(media->years[index]);
@@ -216,6 +196,7 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
     }
     int flag;
 
+    /// Se añade la película/serie en sus generos correspondientes
     for ( int i=0; genre[i] != NULL; i++) {
         media->years[index]->genres = addContentByGenre_Rec(media->years[index]->genres, content, genre[i], title, &flag);
         if (flag == MEM_ERROR){
@@ -223,6 +204,9 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
         }
     }
 
+    /// Se actualiza la cantidad de películas/series añadidas. A pesar de que la misma película/serie se añadio a varios
+    /// generos (si es que tiene mas de uno), se contabilizara una sola vez. Ademas, se actualiza la mejor serie/pelicula
+    /// con su cantidad de votos.
     if ( title == CONTENTTYPE_MOVIE){
         (media->years[index]->moviesCount)++;
         if ( numVotes > media->years[index]->bestMovieRating){
@@ -261,17 +245,19 @@ size_t countContentByYear(const mediaADT media, const unsigned short year, conte
 }
 
 /**
- * Funcion para buscar un genero en la lista de Generos
- * @param first es el puntero al primer genero de la lista
- * @param genre es el genero a bsucar en la lista
- * @return NULL si el genero no esta en la lista. Si esta en la lista, retorna el puntero al nodo.
+ * @brief Función auxiliar para buscar un genero en la lista de generos
+ *
+ * @param first Puntero al primer genero de la lista
+ * @param genre Genero a buscar en la lista
+ * @return NULL si el genero no esta en la lista.
+ * @return Puntero al nodo si esta en la lista.
  */
 
 static TList searchGenre ( const TList first , const char * genre )
 {
     int c;
     if ( first == NULL || (c = strcasecmp(first->genre,genre) ) > 0 )
-        return NULL;
+        return NULL;       /// Como los generos están ordenados alfabéticamente, deja de buscar si se "paso"
     if ( c == 0 )
         return first;
     return searchGenre(first->next , genre);
@@ -322,8 +308,9 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
 }
 
 /**
- * Función auxiliar de iterador que coloca al currentIndex en el siguiente año ocupado/válido.
- * @param media ADT creado para el manejo de películas/series.
+ * @brief Funcion auxiliar de iterador que coloca al currentIndex en el siguiente año ocupado/valido.
+ *
+ * @param ADT creado para el manejo de peliculas/series.
  * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
  */
 static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
@@ -354,54 +341,14 @@ unsigned short nextYear(const mediaADT media){
     return year;
 }
 
-/**
- * @brief Función auxiliar que libera los recursos reservados por una lista de structs genre.
- *
- * @param genre Puntero a struct genre (TList) que contiene las películas/series añadidas dentro de un género en
- * específico, junto a la cantidad añadida de las mismas.
- */
-static void freeGenres_Rec(TList genre){
-    if ( genre == NULL){
-        return;
-    }
-    freeGenres_Rec(genre->next);
-    free(genre->movies);
-    free(genre->series);
-    free(genre);
-}
-
-/**
- * @brief Función auxiliar que libera los recursos reservados por struct year y su puntero.
- *
- * @param year Puntero a struct year que contiene las películas/series añadidas a mediaADT con comienzo en un año
- * determinado.
- */
-static void freeYear(TYear year){
-    freeGenres_Rec(year->genres);
-    free(year);
-}
-
-void freeMediaADT(mediaADT media){
-    if ( media->size == 0){
-        return;
-    }
-    for (size_t i=0; i < media->size; i++){
-        if (media->years[i] != NULL){
-            freeYear(media->years[i]);
-        }
-    }
-    free(media->years);
-    free(media);
-}
-
 int toBeginGenre (const mediaADT media , const unsigned short year )
 {
-    // Se verifica que el año sea valido
+    /// Se verifica que el año sea valido
     if (isYearValid(media,year) != SUCCESS )
         return INVALIDYEAR_ERROR;
 
     TYear aux = media->years[POS(year,media->minYear)];
-    //Se verifica que el año pedido tenga contenido
+    /// Se verifica que el año pedido tenga contenido
     CHECK_MEM(aux)
 
     media->currentGenre = aux->genres;
@@ -420,4 +367,44 @@ char * nextGenre ( const mediaADT media )
     char * aux = media->currentGenre->genre;
     media->currentGenre = media->currentGenre->next;
     return aux;
+}
+
+/**
+ * @brief Funcion auxiliar que libera los recursos reservados por una lista de structs genre.
+ *
+ * @param genre Puntero a struct genre (TList) que contiene las peliculas/series añadidas dentro de un género en
+ * específico, junto a la cantidad añadida de las mismas.
+ */
+static void freeGenres_Rec(TList genre){
+    if ( genre == NULL){
+        return;
+    }
+    freeGenres_Rec(genre->next);
+    free(genre->movies);
+    free(genre->series);
+    free(genre);
+}
+
+/**
+ * @brief Funcion auxiliar que libera los recursos reservados por struct year y su puntero.
+ *
+ * @param year Puntero a struct year que contiene las peliculas/series añadidas a mediaADT con comienzo en un año
+ * determinado.
+ */
+static void freeYear(TYear year){
+    freeGenres_Rec(year->genres);
+    free(year);
+}
+
+void freeMediaADT(mediaADT media){
+    if ( media->size == 0){
+        return;
+    }
+    for (size_t i=0; i < media->size; i++){
+        if (media->years[i] != NULL){
+            freeYear(media->years[i]);
+        }
+    }
+    free(media->years);
+    free(media);
 }
