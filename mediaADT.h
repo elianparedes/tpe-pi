@@ -158,13 +158,6 @@ int hasNextYear(const mediaADT media);
  */
 unsigned short nextYear(const mediaADT media);
 
-/**
- * @brief Funcion que libera los recursos reservados por mediaADT.
- *
- * @param Media ADT creado para el manejo de peliculas/series.
- */
-void freeMediaADT(mediaADT media);
-
 /*******************************************************************************
  *  @section Iteracion por genero
  *  @brief Funciones de iteracion para que el usuario consulte generos validos para un año,
@@ -213,5 +206,12 @@ int hasNextGenre ( const mediaADT media );
  * @return NULL Si no hay un genero valido en el iterador.
  */
 char * nextGenre ( const mediaADT media );
+
+/**
+ * @brief Funcion que libera los recursos reservados por mediaADT.
+ *
+ * @param Media ADT creado para el manejo de peliculas/series.
+ */
+void freeMediaADT(mediaADT media);
 
 #endif //TPEFINAL_MEDIAADT_H

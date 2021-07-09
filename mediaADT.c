@@ -150,7 +150,7 @@ static TList addContentByGenre_Rec(TList listG, const TContent content, const ch
 /**
  * @brief Funcion auxiliar que indica mediante distintas constantes si un año es "valido" o no con respecto a un mediaADT.
  *
- * @param media Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  * @param year Año que sera evaluado.
  * @return INVALIDYEAR_ERROR si el año es menor al año mínimo indicado en el mediaADT.
  * @return MEM_ERROR si el año es mayor a la memoria que fue asignada en el mediaADT.
@@ -310,7 +310,7 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
 /**
  * @brief Funcion auxiliar de iterador que coloca al currentIndex en el siguiente año ocupado/valido.
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param ADT creado para el manejo de peliculas/series.
  * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
  */
 static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
@@ -339,6 +339,34 @@ unsigned short nextYear(const mediaADT media){
     unsigned short year = YEAR(media->currentIndex, media->minYear);
     nextOcuppiedYear(media, media->currentIndex - 1);
     return year;
+}
+
+int toBeginGenre (const mediaADT media , const unsigned short year )
+{
+    /// Se verifica que el año sea valido
+    if (isYearValid(media,year) != SUCCESS )
+        return INVALIDYEAR_ERROR;
+
+    TYear aux = media->years[POS(year,media->minYear)];
+    /// Se verifica que el año pedido tenga contenido
+    CHECK_MEM(aux)
+
+    media->currentGenre = aux->genres;
+    return 1;
+}
+
+int hasNextGenre ( const mediaADT media )
+{
+    return media->currentGenre != NULL;
+}
+
+char * nextGenre ( const mediaADT media )
+{
+    if ( !hasNextGenre(media) )
+        return NULL;
+    char * aux = media->currentGenre->genre;
+    media->currentGenre = media->currentGenre->next;
+    return aux;
 }
 
 /**
@@ -379,32 +407,4 @@ void freeMediaADT(mediaADT media){
     }
     free(media->years);
     free(media);
-}
-
-int toBeginGenre (const mediaADT media , const unsigned short year )
-{
-    /// Se verifica que el año sea valido
-    if (isYearValid(media,year) != SUCCESS )
-        return INVALIDYEAR_ERROR;
-
-    TYear aux = media->years[POS(year,media->minYear)];
-    /// Se verifica que el año pedido tenga contenido
-    CHECK_MEM(aux)
-
-    media->currentGenre = aux->genres;
-    return 1;
-}
-
-int hasNextGenre ( const mediaADT media )
-{
-    return media->currentGenre != NULL;
-}
-
-char * nextGenre ( const mediaADT media )
-{
-    if ( !hasNextGenre(media) )
-        return NULL;
-    char * aux = media->currentGenre->genre;
-    media->currentGenre = media->currentGenre->next;
-    return aux;
 }
