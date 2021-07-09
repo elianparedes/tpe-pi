@@ -70,6 +70,7 @@ void query1(mediaADT media, char * filePath){
     FILE * file=fopen(filePath, "w");
 
     toBeginYear(media);
+    fprintf(file, "year; films; series\n");
     while (hasNextYear(media)){
         unsigned short year= nextYear(media);
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
