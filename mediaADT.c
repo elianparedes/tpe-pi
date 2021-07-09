@@ -66,8 +66,10 @@ mediaADT newMediaADT (const size_t minYear)
  * @brief Funcion auxiliar que copia en un vector una pelicula/serie.
  *
  * @details Se reserva memoria a bloques para evitar reallocs cada vez que se ejecute la funcion. A su vez, se le permite
- * al usuario elegir si desea un bloque mas grande o mas chico. De esta forma, si se añade una gran cantidad de
+ * al usuario elegir si desea un bloque mas grande o mas chico mediante MEM_BLOCK. De esta forma, si se añade una gran cantidad de
  * peliculas y series no se incrementara el tiempo de ejecucion en gran manera.
+ * Al finalizar la carga, algunas posiciones del vector podrian quedar vacias. En este caso, se priorizo tiempo de ejecucion
+ * sobre memoria debido a que podria haber una gran carga de datos.
  *
  * @param contentVec Vector de punteros a TContent en el que sera copiado al final la nueva película/serie.
  * @param content Pelicula/serie que sera copiada.
@@ -188,7 +190,9 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
         media->size= index+1;
     }
 
-    /// Si no fue añadida una pelicula/serie al año, se reserva espacio
+    /// Si no fue añadida una pelicula/serie en el año, se reserva espacio.
+    /// Luego de la carga de todas las series y peliculas, podrian quedar posiciones vacias dentro del vector years.
+    /// En este caso, se priorizo tiempo de ejecucion sobre memoria debido a que podria haber una gran carga de datos.
     if (media->years[index] == NULL){
         media->years[index]= calloc(1, sizeof(struct year));
         CHECK_MEM(media->years[index]);
