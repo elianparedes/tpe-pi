@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MIN_YEAR 1850
-#define MAX_GENRES 15
-#define BUFFER_SIZE 512
+#define MIN_YEAR 1850         /**< @def Minimo año que aceptara el TAD de pelicula/serie                    */
+#define MAX_GENRES 15         /**< @def Maxima cantidad de generos que aceptara el TAD por pelicula/serie   */
+#define BUFFER_SIZE 512       /** @def  Maxima cantidad de caracteres por linea que se obtendra del archivo */
+
+/**< Macro que determina si S1 es del tipo pasado como parametro TYPE */
 #define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp(S1,S2)==0) \
                                                   return TYPE;}
 
@@ -27,6 +29,19 @@ int getDataFromFile(mediaADT media, const char * filePath);
 char ** createGenresVec(char ** vec, char * string);
 
 TContent createContent(char * line, const char * delim );
+
+/**
+ * @brief Funcion que determina si el contenido es una pelicula , serie u otro.
+ *
+ * @details Si no es una serie o una pelicula , devuelve CONTENTTYPE_ERROR indicando que no es
+ * un contentType esperado.
+ *
+ * @param content es el contenido del cual se determinara su contentType.
+ * @return CONTENTTYPE_MOVIE si es un pelicula.
+ * @return CONTENTTYPE_SERIES si es una serie.
+ * @return CONTENTTYPE_ERROR si no es serie o pelicula.
+ */
+contentType getContentType ( TContent content );
 
 /**
  * @brief Funcion que consulta la cantidad de peliculas y series de cada año. Crea un archivo en el directorio especificado
@@ -63,17 +78,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-/**
- * @brief Funcion que determina si el contenido es una pelicula , serie u otro.
- *
- * @details Si no es una serie o una pelicula , devuelve CONTENTTYPE_ERROR indicando que no es
- * un contentType esperado.
- *
- * @param content es el contenido del cual se determinara su contentType.
- * @return CONTENTTYPE_MOVIE si es un pelicula.
- * @return CONTENTTYPE_SERIES si es una serie.
- * @return CONTENTTYPE_ERROR si no es serie o pelicula.
- */
 contentType getContentType ( TContent content )
 {
     COMPARE_TYPES(content.titleType,"movie",CONTENTTYPE_MOVIE)
