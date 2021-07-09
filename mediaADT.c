@@ -15,12 +15,12 @@
  *  @brief Struct para manejar películas y series en un género determinado
  */
 typedef struct genre{
-    char * genre;              /**< Nombre del género                                     */
-    TContent * series;         /**< Vector que contiene las series añadidas               */
-    TContent * movies;         /**< Vector que contiene las películas añadidas            */
-    size_t moviesCount;        /**< Cantidad de películas añadidas en el género           */
-    size_t seriesCount;        /**< Cantidad de series añadidas en el género              */
-    struct genre * next;       /**< Puntero al siguiente struct genre (para formar lista) */
+    char genre[MAX_GENRE_SIZE]; /**< Nombre del género                                     */
+    TContent * series;          /**< Vector que contiene las series añadidas               */
+    TContent * movies;          /**< Vector que contiene las películas añadidas            */
+    size_t moviesCount;         /**< Cantidad de películas añadidas en el género           */
+    size_t seriesCount;         /**< Cantidad de series añadidas en el género              */
+    struct genre * next;        /**< Puntero al siguiente struct genre (para formar lista) */
 } TGenre;
 
 typedef TGenre * TList;
@@ -69,9 +69,11 @@ mediaADT newMediaADT (const size_t minYear)
  * @return Puntero al comienzo del vector.
  */
 static TContent * copyStruct(TContent * contentVec, const TContent content, const size_t index){
-    contentVec= realloc(contentVec, sizeof(TContent)*(index+1));
-    if ( contentVec == NULL){
-        return NULL;
+    if (index % MEM_BLOCK == 0){
+        contentVec = realloc(contentVec, sizeof(TContent)*(index + MEM_BLOCK));
+        if ( contentVec == NULL){
+            return NULL;
+        }
     }
     contentVec[index]=content;
     return contentVec;
@@ -122,11 +124,11 @@ static TList addContentByGenre_Rec(TList listG, const TContent content, const ch
             *flag = MEM_ERROR;
             return NULL;
         }
-        newGenre->genre=malloc(strlen(genre)+1);
         strcpy(newGenre->genre, genre);
         *flag = copyContent(newGenre, content, title);
         newGenre->next = listG;
         return newGenre;
+
     } else if (c == 0) {
         *flag = copyContent(listG, content, title);
         return listG;
@@ -203,7 +205,7 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
     if ( media->size == 0 || c == MEM_ERROR){
         media->years=realloc(media->years, sizeof(TYear)*(index+1));
         CHECK_MEM(media->years);
-        setNotOcuppied(media->years, media->size, index);
+        memset(media->years + media->size, 0, (index - media->size + 1) * sizeof (TYear));
         media->size= index+1;
     }
 
@@ -213,7 +215,7 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
         media->dim++;
     }
     int flag;
-    TContent * copy=NULL;
+
     for ( int i=0; genre[i] != NULL; i++) {
         media->years[index]->genres = addContentByGenre_Rec(media->years[index]->genres, content, genre[i], title, &flag);
         if (flag == MEM_ERROR){
@@ -223,12 +225,18 @@ int addContent( mediaADT media , const TContent content , const unsigned short y
 
     if ( title == CONTENTTYPE_MOVIE){
         (media->years[index]->moviesCount)++;
+        if ( numVotes > media->years[index]->bestMovieRating){
+            media->years[index]->bestMovieRating = numVotes;
+            media->years[index]->bestMovie = content;
+        }
     }
     else {
         (media->years[index]->seriesCount++);
+        if (numVotes > media->years[index]->bestSeriesRating){
+            media->years[index]->bestSeriesRating= numVotes;
+            media->years[index]->bestSeries = content;
+        }
     }
-
-    setRating(media->years[index], content, numVotes, title);
 
     return 1;
 }
@@ -359,7 +367,6 @@ static void freeGenres_Rec(TList genre){
     freeGenres_Rec(genre->next);
     free(genre->movies);
     free(genre->series);
-    free(genre->genre);
     free(genre);
 }
 

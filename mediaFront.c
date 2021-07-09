@@ -62,7 +62,6 @@ contentType getContentType ( TContent content )
 
 int getDataFromFile(mediaADT media, const char * filePath){
     char buffer[BUFFER_SIZE];
-
     FILE *file = fopen(filePath, "r");
     fgets(buffer, BUFFER_SIZE, file);
     while (fgets(buffer, BUFFER_SIZE, file)){
@@ -71,6 +70,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
         if ( aux == CONTENTTYPE_ERROR )
             //TENER EL CUIDADO DE SI HAY QUE LIBERAR O NO
             exit(EXIT_FAILURE);
+
         addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
         free(new.genres);
     }
@@ -96,12 +96,13 @@ char ** createGenresVec(char ** vec, char * string){
     return vec;
 }
 
-TContent createContent(char * line, const char * delim )
+TContent createContent(char * line, const char * delim)
 {
-    TContent newContent ;
+    TContent newContent;
 
-    strcpy(newContent.titleType, strtok(line, delim));
-    strcpy(newContent.primaryTitle, strtok(NULL, delim));
+    strcpy(newContent.titleType,strtok(line,delim));
+
+    strcpy(newContent.primaryTitle,strtok(NULL,delim));
 
     newContent.startYear = atoi(strtok(NULL,delim));
     newContent.endYear = atoi(strtok(NULL,delim));
@@ -180,7 +181,7 @@ void query3(mediaADT media, char * filePath){
         ///Se imprime en el archivo la información con el formato correspondiente.
         fprintf(file, "%d;%s;%.1f;%lu;%s;%.1f;%lu\n",year,
                 movie.primaryTitle,movie.averageRating,movie.numVotes,
-                series.primaryTitle,series.averageRating,series.numVotes);
+                movie.primaryTitle,series.averageRating,series.numVotes);
 
     }
 

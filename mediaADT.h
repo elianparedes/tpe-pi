@@ -24,21 +24,31 @@ enum errorStates {
 
 typedef struct mediaCDT * mediaADT;
 
-#define MAX_SIZE 256
+/**
+ * @brief Tamaño de bloque para alocar memoria.
+ * @details Variar el tamaño dependiendo del tamño del proyecto.
+ *
+ * @see MEM_BLOCK
+ * */
+#define MEM_BLOCK 512
+
+#define MAX_TITLE_SIZE 256 /**< @def Tamaño máximo de título del contenido */
+#define MAX_TYPE_SIZE 32   /**< @def Tamaño máximo de tipo del contenido   */
+#define MAX_GENRE_SIZE 64  /**< @def Tamaño máximo de género del contenido */
 
 /**
  * @brief El usuario deberá definir una estructura con información sobre los contenidos
  * que desea guardar.
  */
 typedef struct content{
-    char titleType[MAX_SIZE];       /**< Tipo de contenido (película, serie)             */
-    char primaryTitle[MAX_SIZE];    /**< Título Original                                 */
-    char ** genres;                 /**< Lista de generos correspondientes al contenido  */
-    unsigned short startYear;       /**< El año de lanzamiento o comienzo de emisión     */
-    unsigned short endYear;         /**< Si es una serie, el año de finalización         */
-    unsigned short runtimeMinutes;  /**< Duración en minutos                             */
-    unsigned long numVotes;         /**< Cantidad de votos que obtuvo                    */
-    float averageRating;            /**< Numero decimal entre 0 y 10                     */
+    char titleType[MAX_TYPE_SIZE];        /**< Tipo de contenido (película, serie)             */
+    char primaryTitle[MAX_TITLE_SIZE];    /**< Título Original                                 */
+    char ** genres;                       /**< Lista de generos correspondientes al contenido  */
+    unsigned short startYear;             /**< El año de lanzamiento o comienzo de emisión     */
+    unsigned short endYear;               /**< Si es una serie, el año de finalización         */
+    unsigned short runtimeMinutes;        /**< Duración en minutos                             */
+    unsigned long numVotes;               /**< Cantidad de votos que obtuvo                    */
+    float averageRating;                  /**< Numero decimal entre 0 y 10                     */
 } TContent;
 
 /**
