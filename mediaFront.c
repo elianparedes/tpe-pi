@@ -8,6 +8,8 @@
 #define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp(S1,S2)==0) \
                                                   return TYPE;}
 
+const char * UNDEFINED_SYMBOL = "\\N"; /**< String que se colocara en campos vacios durante la impresion */
+
 int getDataFromFile(mediaADT media, const char * filePath);
 
 char ** createGenresVec(char ** vec, char * string);
@@ -136,6 +138,7 @@ void query1(mediaADT media, char * filePath){
 
 void query2 ( mediaADT media , char * filePath )
 {
+    ///Se crea el archivo, se abre en modo "write" para escribir sobre el mismo.
     FILE * file = fopen(filePath,"w");
 
     ///Se agrega el header correspondiende al archivo
@@ -152,9 +155,10 @@ void query2 ( mediaADT media , char * filePath )
         {
             char * genre = nextGenre(media);
             size_t countOfMovies = countContentByGenre(media,year,genre,CONTENTTYPE_MOVIE);
-            /**Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
-            *archivo y se continua la iteracion
-             */
+
+            /** Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
+              * archivo y se continua la iteracion
+              */
             fprintf(file,"%d;%s;%ld\n",year , genre , countOfMovies);
         }
     }
@@ -178,10 +182,14 @@ void query3(mediaADT media, char * filePath){
         TContent movie = mostVoted(media, year, CONTENTTYPE_MOVIE);
         TContent series = mostVoted(media, year, CONTENTTYPE_SERIES);
 
-        ///Se imprime en el archivo la información con el formato correspondiente.
+        /**
+         * Se imprime en el archivo la información con el formato correspondiente.
+         * En caso de que no se obtenga el titulo original de la pelicula/serie, se imprimira en su lugar
+         * un simbolo especial.
+         */
         fprintf(file, "%d;%s;%lu;%.1f;%s;%lu;%.1f\n",year,
-                movie.primaryTitle,movie.numVotes,movie.averageRating,
-                movie.primaryTitle,series.numVotes,series.averageRating);
+                movie.primaryTitle[0] != '\0' ? movie.primaryTitle : UNDEFINED_SYMBOL ,movie.numVotes,movie.averageRating,
+                series.primaryTitle[0] != '\0' ? series.primaryTitle : UNDEFINED_SYMBOL,series.numVotes,series.averageRating);
 
     }
 
