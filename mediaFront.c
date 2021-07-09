@@ -6,7 +6,26 @@
 
 int getDataFromFile(char * filePath);
 
-TContent createContent(char * line, char * delim);
+TContent createContent(char * line, char * delim )
+{
+    TContent newContent ;
+    newContent.titleType = strtok(line,delim);
+    newContent.primaryTitle  = strtok(NULL,delim);
+    newContent.startYear = atoi(strtok(NULL,delim));
+    newContent.endYear = atoi(strtok(NULL,delim));
+
+    char * genres = strtok(NULL,delim);
+
+    newContent.averageRating = atof(strtok(NULL,delim));
+    newContent.numVotes = atoi(strtok(NULL,delim));
+    newContent.runtimeMinutes = atoi(strtok(NULL,delim));
+
+    newContent.genres = malloc(MAX*sizeof(char*));
+    createGenresVec(newContent.genres, genres);
+
+    return newContent;
+
+}
 
 char ** createGenresVec(char ** vec, char * string){
     char * token;
