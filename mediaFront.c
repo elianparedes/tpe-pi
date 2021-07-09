@@ -179,9 +179,9 @@ void query3(mediaADT media, char * filePath){
         TContent series = mostVoted(media, year, CONTENTTYPE_SERIES);
 
         ///Se imprime en el archivo la información con el formato correspondiente.
-        fprintf(file, "%d;%s;%.1f;%lu;%s;%.1f;%lu\n",year,
-                movie.primaryTitle,movie.averageRating,movie.numVotes,
-                movie.primaryTitle,series.averageRating,series.numVotes);
+        fprintf(file, "%d;%s;%lu;%.1f;%s;%lu;%.1f\n",year,
+                movie.primaryTitle,movie.numVotes,movie.averageRating,
+                movie.primaryTitle,series.numVotes,series.averageRating);
 
     }
 
