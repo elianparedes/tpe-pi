@@ -5,8 +5,6 @@
 #define MAX_GENRES 20
 #define BUFFER_SIZE 128
 
-FILE * createFile(char * filePath);
-
 int getDataFromFile(mediaADT media, const char * filePath);
 
 TContent createContent(char * line, const char * delim);
@@ -61,6 +59,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
     char buffer[BUFFER_SIZE];
 
     FILE *file = fopen(filePath, "r");
+    fgets(buffer, BUFFER_SIZE, file);
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
         addContent(media, new, new.startYear, new.genres, new.numVotes, CONTENTTYPE_MOVIE);
@@ -69,11 +68,6 @@ int getDataFromFile(mediaADT media, const char * filePath){
     fclose(file);
 
     return 1;
-}
-
-FILE * createFile(char * filePath){
-    FILE * newFile = fopen(filePath, "w");
-    return newFile;
 }
 
 
