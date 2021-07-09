@@ -97,9 +97,7 @@ size_t countContentByYear(const mediaADT media, const unsigned short year, conte
  * @param genre Genero del cual se solicita la cantidad de peliculas o de series para el año especificado.
  * @param CONTENTTYPE_ es el tipo de contenido del cual se desea conocer su cantidad para el año y genero indicado.
  * Distinguiendo entre pelicula o serie.
- * @return INVALIDYEAR_ERROR si el año ingresado es invalido.
- * @return NULLPOINTER_ERROR si no hay registro de peliculas para ese genero.
- * @return Cantidad de peliculas para el genero especificado.
+ * @return 0 si el año o el genero son invalidos o si no hay registro de peliculas/series para ese genero.
  */
 size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre, contentType CONTENTTYPE_ );
 
@@ -158,13 +156,6 @@ int hasNextYear(const mediaADT media);
  */
 unsigned short nextYear(const mediaADT media);
 
-/**
- * @brief Funcion que libera los recursos reservados por mediaADT.
- *
- * @param Media ADT creado para el manejo de peliculas/series.
- */
-void freeMediaADT(mediaADT media);
-
 /*******************************************************************************
  *  @section Iteracion por genero
  *  @brief Funciones de iteracion para que el usuario consulte generos validos para un año,
@@ -213,5 +204,12 @@ int hasNextGenre ( const mediaADT media );
  * @return NULL Si no hay un genero valido en el iterador.
  */
 char * nextGenre ( const mediaADT media );
+
+/**
+ * @brief Funcion que libera los recursos reservados por mediaADT.
+ *
+ * @param Media ADT creado para el manejo de peliculas/series.
+ */
+void freeMediaADT(mediaADT media);
 
 #endif //TPEFINAL_MEDIAADT_H
