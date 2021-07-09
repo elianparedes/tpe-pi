@@ -179,8 +179,8 @@ static void setNotOcuppied ( TYear * years , size_t from , const size_t to ){
 static void setRating(TYear year, const TContent content, const unsigned long numVotes, const contentType title){
     if ( title == CONTENTTYPE_MOVIE){
         if ( numVotes > year->bestMovieRating){
-            year->bestMovieRating= numVotes;
-            year->bestMovie= content;
+            year->bestMovieRating = numVotes;
+            year->bestMovie = content;
         }
     }
     else{
