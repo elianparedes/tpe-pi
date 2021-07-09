@@ -5,14 +5,46 @@
 #define MIN_YEAR 1850
 #define MAX_GENRES 15
 #define BUFFER_SIZE 512
-#define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp(S1,S2)==0) \
+#define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp((S1),(S2))==0) \
                                                   return TYPE;}
+#define ERROR_MANAGER(TO_CHECK,ERROR,ADT,ERROR_TYPE){ if ((TO_CHECK) == (ERROR)) \
+                                                  errorManager((ERROR_TYPE),(ADT));}
+#define INVALID_PATH -1
+#define IS_FATALERROR(E) ( (E) == RANGE_ERROR || (E) == MEM_ERROR || (E) == INVALID_PATH )
 
 int getDataFromFile(mediaADT media, const char * filePath);
 
 char ** createGenresVec(char ** vec, char * string);
 
 TContent createContent(char * line, const char * delim );
+
+
+void errorManager ( int error , mediaADT media )
+{
+    switch (error) {
+        case INVALID_PATH:
+            printf("El path ingresado es invalido\n");
+            break;
+        case MEM_ERROR:
+            printf("Error en asignación de memoria \n");
+            break;
+        case RANGE_ERROR:
+            printf("El iterador no puede avanzar\n");
+            break;
+        case CONTENTTYPE_ERROR:
+            printf("Se ingreso un tipo de contenido inválido \n");
+            break;
+        default:
+            printf("Se ingreso un año inexistente o fuera de rango\n");
+    }
+    if (IS_FATALERROR(error))
+    {
+        if ( error != INVALID_PATH )
+            freeMediaADT(media);
+        exit(EXIT_FAILURE);
+    }
+
+}
 
 void query1(mediaADT media, char * filePath);
 
@@ -31,7 +63,7 @@ int main(int argc, char *argv[]) {
 
     mediaADT media = newMediaADT(MIN_YEAR);
 
-    getDataFromFile(media, "../imdbv3.csv");
+    getDataFromFile(media, "../tpeFinal/imdbv3.csv");
 
     query1(media, "query1.csv");
     query2(media, "query2.csv");
@@ -63,15 +95,20 @@ contentType getContentType ( TContent content )
 int getDataFromFile(mediaADT media, const char * filePath){
     char buffer[BUFFER_SIZE];
     FILE *file = fopen(filePath, "r");
+    ERROR_MANAGER(file,NULL,media,INVALID_PATH)
     fgets(buffer, BUFFER_SIZE, file);
+    int out;
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
         contentType aux = getContentType(new);
-        if ( aux == CONTENTTYPE_ERROR )
-            //TENER EL CUIDADO DE SI HAY QUE LIBERAR O NO
-            exit(EXIT_FAILURE);
-
-        addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
+        if ( (enum errorStates)aux != CONTENTTYPE_ERROR)
+        {
+            out = addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
+            if (out != 1 )
+                errorManager(out,media);
+        }
+        else
+            errorManager((enum errorStates)aux,media);
         free(new.genres);
     }
     fclose(file);
@@ -127,6 +164,7 @@ void query1(mediaADT media, char * filePath){
     toBeginYear(media);
     while (hasNextYear(media)){
         unsigned short year= nextYear(media);
+        ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
         size_t SYears= countContentByYear(media, year, CONTENTTYPE_SERIES);
         fprintf(file, "%u;%zu;%zu\n", year, MYears, SYears);
@@ -146,11 +184,13 @@ void query2 ( mediaADT media , char * filePath )
     while (hasNextYear(media))
     {
         unsigned int year = nextYear(media);
+        ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
         toBeginGenre(media,year);
         ///Se itera por generos validos para obtener la cantidad de peliculas del genero actual
         while(hasNextGenre(media))
         {
             char * genre = nextGenre(media);
+            ERROR_MANAGER(genre,NULL,media,RANGE_ERROR)
             size_t countOfMovies = countContentByGenre(media,year,genre,CONTENTTYPE_MOVIE);
             /**Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
             *archivo y se continua la iteracion
@@ -173,7 +213,7 @@ void query3(mediaADT media, char * filePath){
     toBeginYear(media);
     while (hasNextYear(media)){ ///< Mientras aún existan años validos, se seguirá escribiendo el archivo.
         unsigned short year = nextYear(media);
-
+        ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
         ///Se obtiene la película y la serie más votada del año correspondiente.
         TContent movie = mostVoted(media, year, CONTENTTYPE_MOVIE);
         TContent series = mostVoted(media, year, CONTENTTYPE_SERIES);
