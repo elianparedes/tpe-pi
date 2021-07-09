@@ -46,7 +46,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
         if ( aux == CONTENTTYPE_ERROR )
             //TENER EL CUIDADO DE SI HAY QUE LIBERAR O NO
             exit(EXIT_FAILURE);
-        addContent(media, new, new.startYear, new.genres, new.numVotes, CONTENTTYPE_MOVIE);
+        addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
         free(new.genres);
     }
     fclose(file);
@@ -75,18 +75,22 @@ TContent createContent(char * line, const char * delim )
 {
     TContent newContent ;
     newContent.titleType = strtok(line,delim);
-    newContent.primaryTitle  = strtok(NULL,delim);
+
+    char * title = strtok(NULL,delim);
+    newContent.primaryTitle = malloc(strlen(title) + 1);
+    strcpy(newContent.primaryTitle, title);
+
     newContent.startYear = atoi(strtok(NULL,delim));
     newContent.endYear = atoi(strtok(NULL,delim));
 
     char * tokenAux = strtok(NULL,delim);
-    newContent.genres = malloc(MAX_GENRES*sizeof(char*));
-    createGenresVec(newContent.genres, tokenAux);
 
-    newContent.averageRating = atof(strtok(tokenAux,delim));
+    newContent.averageRating = atof(strtok(NULL,delim));
     newContent.numVotes = atoi(strtok(NULL,delim));
     newContent.runtimeMinutes = atoi(strtok(NULL,delim));
 
+    newContent.genres = malloc(MAX_GENRES*sizeof(char*));
+    createGenresVec(newContent.genres, tokenAux);
     return newContent;
 }
 
