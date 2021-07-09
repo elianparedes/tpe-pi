@@ -1,6 +1,7 @@
 #include "mediaADT.h"
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #define POS(Y,MIN) ((Y) - (MIN))            /**< @def Macro para obtener posición en vector de punteros a TYear */
 #define YEAR(P,MIN) ((P) + (MIN))           /**< @def Macro para obtener el año a partir de un índice */
@@ -156,20 +157,6 @@ static int isYearValid (mediaADT media , const unsigned short year)
 }
 
 /**
- * @brief Función auxiliar que llena con NULL un vector de tipo TYear * para indicar que no tiene contenido dentro.
- *
- * @param years Vector que será recorrido y llenado con NULL.
- * @param from Indica el comienzo de recorrido.
- * @param to Indica el final de recorrido.
- */
-static void setNotOcuppied ( TYear * years , size_t from , const size_t to ){
-    while ( from <= to )
-    {
-        years[from++] = NULL;
-    }
-}
-
-/**
  * @brief Función auxiliar que actualiza película/serie con mayor cantidad de votos e indica la nueva cantidad en mediaADT.
  *
  * @param year Puntero a struct year que contiene las películas/series añadidas a mediaADT con comienzo en un año
@@ -193,7 +180,7 @@ static void setRating(TYear year, const TContent content, const unsigned long nu
     }
 }
 
-int addContent( mediaADT media , const TContent content , const unsigned short year , const char ** genre , const unsigned long numVotes , const contentType title){
+int addContent( mediaADT media , const TContent content , const unsigned short year , char ** genre , const unsigned long numVotes , const contentType title){
     int c;
     if ( (c=isYearValid(media, year)) == INVALIDYEAR_ERROR){
         return INVALIDYEAR_ERROR;

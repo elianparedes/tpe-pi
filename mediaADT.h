@@ -73,7 +73,7 @@ mediaADT newMediaADT(const size_t minYear);
  * ni a una película.
  *
  */
-int addContent( mediaADT media , const TContent content ,const unsigned short year , const char ** genre , const unsigned long numVotes , const contentType title);
+int addContent( mediaADT media , const TContent content ,const unsigned short year , char ** genre , const unsigned long numVotes , const contentType title);
 
 /**
  * @brief Función para obtener la cantidad de peliculas/series para un año.
