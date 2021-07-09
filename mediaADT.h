@@ -76,7 +76,7 @@ mediaADT newMediaADT(const size_t minYear);
  * @return INVALIDYEAR_ERROR si variable "year" es menor al año mínimo que acepta el TAD.
  * @return CONTENTTYPE_ERROR si variable "title" no corresponde ni a una serie ni a una pelicula.
  */
-int addContent( mediaADT media , const TContent content ,const unsigned short year , const char ** genre , const unsigned long numVotes , const contentType title);
+int addContent( mediaADT media , const TContent content ,const unsigned short year , char ** genre , const unsigned long numVotes , const contentType title);
 
 /**
  * @brief Funcion para obtener la cantidad de peliculas/series para un año.

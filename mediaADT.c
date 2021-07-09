@@ -1,6 +1,7 @@
 #include "mediaADT.h"
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #define POS(Y,MIN) ((Y) - (MIN))            /**< @def Macro para obtener posicion en vector de punteros a TYear */
 #define YEAR(P,MIN) ((P) + (MIN))           /**< @def Macro para obtener el año a partir de un indice */
@@ -164,7 +165,7 @@ static int isYearValid (mediaADT media , const unsigned short year)
     return SUCCESS;
 }
 
-int addContent( mediaADT media , const TContent content , const unsigned short year , const char ** genre , const unsigned long numVotes , const contentType title){
+int addContent( mediaADT media , const TContent content , const unsigned short year , char ** genre , const unsigned long numVotes , const contentType title){
     int c;
     /// Se valida si el año pasado como parametro es válido dentro del mediaADT
     if ( (c=isYearValid(media, year)) == INVALIDYEAR_ERROR){

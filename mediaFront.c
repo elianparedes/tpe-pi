@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 
     mediaADT media = newMediaADT(MIN_YEAR);
 
-    getDataFromFile(media, "../imdbv3.csv");
+    getDataFromFile(media, argv[1]);
 
     query1(media, "query1.csv");
     query2(media, "query2.csv");
@@ -67,7 +67,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
         contentType aux = getContentType(new);
-        if ( aux == CONTENTTYPE_ERROR )
+        if (aux == (contentType) CONTENTTYPE_ERROR)
             //TENER EL CUIDADO DE SI HAY QUE LIBERAR O NO
             exit(EXIT_FAILURE);
 
@@ -129,7 +129,7 @@ void query1(mediaADT media, char * filePath){
         unsigned short year= nextYear(media);
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
         size_t SYears= countContentByYear(media, year, CONTENTTYPE_SERIES);
-        fprintf(file, "%u;%zu;%zu\n", year, MYears, SYears);
+        fprintf(file, "%u;%ld;%ld\n", year, MYears, SYears);
     }
     fclose(file);
 }
@@ -155,7 +155,7 @@ void query2 ( mediaADT media , char * filePath )
             /**Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
             *archivo y se continua la iteracion
              */
-            fprintf(file,"%d;%s;%zu\n",year , genre , countOfMovies);
+            fprintf(file,"%d;%s;%ld\n",year , genre , countOfMovies);
         }
     }
 
@@ -179,9 +179,9 @@ void query3(mediaADT media, char * filePath){
         TContent series = mostVoted(media, year, CONTENTTYPE_SERIES);
 
         ///Se imprime en el archivo la información con el formato correspondiente.
-        fprintf(file, "%d;%s;%.1f;%lu;%s;%.1f;%lu\n",year,
-                movie.primaryTitle,movie.averageRating,movie.numVotes,
-                movie.primaryTitle,series.averageRating,series.numVotes);
+        fprintf(file, "%d;%s;%lu;%.1f;%s;%lu;%.1f\n",year,
+                movie.primaryTitle,movie.numVotes,movie.averageRating,
+                movie.primaryTitle,series.numVotes,series.averageRating);
 
     }
 
