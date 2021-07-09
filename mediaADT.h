@@ -55,7 +55,7 @@ mediaADT newMediaADT(const size_t minYear);
  * @param year Año en el que comenzó la película/serie.
  * @param genre Vector de generos de la película/serie.
  * @param numVotes Cantidad de votos de la película/ serie.
- * @param title Indica si se añadirá una película o una serie.
+ * @param contentType Indica si se añadirá una película o una serie. @see enum contentTypes
  * @return 1 si "content" se añadió exitosamente, MEM_ERROR si se produjo un error de memoria, INVALIDYEAR_ERROR si variable
  * "year" es menor al año mínimo que acepta el TAD o CONTENTTYPE_ERROR si variable "title" no corresponde ni a una serie
  * ni a una película.

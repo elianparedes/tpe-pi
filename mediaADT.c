@@ -319,13 +319,13 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
  * @param fromIndex Indice desde donde se comienza a buscar el siguiente año ocupado.
  */
 static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
-    for (size_t i = fromIndex; i >= 0; --i) {
+    for (size_t i = fromIndex; i > 0; --i) {
         if (media->years[i] != NULL) {
             media->currentIndex = i;
             return;
         }
     }
-    media->currentIndex = 0;
+    media->currentIndex = media->size;
 }
 
 void toBeginYear(const mediaADT media){

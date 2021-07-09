@@ -2,9 +2,35 @@
 #include <stdio.h>
 #include <string.h>
 #define MAX_GENRES 15
-#define GENRES_COUNT 0
+#define BUFFER_SIZE 128
 
-int getDataFromFile(char * filePath);
+int getDataFromFile(mediaADT media, const char * filePath);
+char ** createGenresVec(char ** vec, char * string);
+TContent createContent(char * line, const char * delim );
+void query2 ( mediaADT media , char * filePath );
+
+
+int main(int argc, char *argv[]) {
+
+
+    return 0;
+}
+
+int getDataFromFile(mediaADT media, const char * filePath){
+
+    char buffer[BUFFER_SIZE];
+
+    FILE *file = fopen(filePath, "r");
+    fgets(buffer, BUFFER_SIZE, file);
+    while (fgets(buffer, BUFFER_SIZE, file)){
+        TContent new = createContent(buffer, ";");
+        addContent(media, new, new.startYear, new.genres, new.numVotes, CONTENTTYPE_MOVIE);
+        free(new.genres);
+    }
+    fclose(file);
+
+    return 1;
+}
 
 char ** createGenresVec(char ** vec, char * string){
     char * token;
@@ -23,13 +49,14 @@ char ** createGenresVec(char ** vec, char * string){
     return vec;
 }
 
-TContent createContent(char * line, char * delim )
+TContent createContent(char * line, const char * delim )
 {
     TContent newContent ;
     newContent.titleType = strtok(line,delim);
     newContent.primaryTitle  = strtok(NULL,delim);
     newContent.startYear = atoi(strtok(NULL,delim));
     newContent.endYear = atoi(strtok(NULL,delim));
+
     char * tokenAux = strtok(NULL,delim);
     newContent.genres = malloc(MAX_GENRES*sizeof(char*));
     createGenresVec(newContent.genres, tokenAux);
@@ -38,10 +65,7 @@ TContent createContent(char * line, char * delim )
     newContent.numVotes = atoi(strtok(NULL,delim));
     newContent.runtimeMinutes = atoi(strtok(NULL,delim));
 
-
-
     return newContent;
-
 }
 
 void query2 ( mediaADT media , char * filePath )
@@ -67,13 +91,4 @@ void query2 ( mediaADT media , char * filePath )
     }
 
     fclose(file);
-}
-
-
-
-int
-main(int argc, char *argv[]) {
-
-
-    return 0;
 }
