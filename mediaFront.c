@@ -74,7 +74,7 @@ void query1(mediaADT media, char * filePath){
         unsigned short year= nextYear(media);
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
         size_t SYears= countContentByYear(media, year, CONTENTTYPE_SERIES);
-        fprintf(file, "%u; %lu, %lu", year, MYears, SYears);
+        fprintf(file, "%u; %zu; %zu\n", year, MYears, SYears);
     }
     fclose(file);
 }
