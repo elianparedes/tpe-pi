@@ -7,12 +7,10 @@
 int getDataFromFile(mediaADT media, const char * filePath);
 char ** createGenresVec(char ** vec, char * string);
 TContent createContent(char * line, const char * delim );
+void query1(mediaADT media, char * filePath);
 void query2 ( mediaADT media , char * filePath );
 
-
 int main(int argc, char *argv[]) {
-
-
     return 0;
 }
 
@@ -66,6 +64,19 @@ TContent createContent(char * line, const char * delim )
     newContent.runtimeMinutes = atoi(strtok(NULL,delim));
 
     return newContent;
+}
+
+void query1(mediaADT media, char * filePath){
+    FILE * file=fopen(filePath, "w");
+
+    toBeginYear(media);
+    while (hasNextYear(media)){
+        unsigned short year= nextYear(media);
+        size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
+        size_t SYears= countContentByYear(media, year, CONTENTTYPE_SERIES);
+        fprintf(file, "%u; %lu, %lu", year, MYears, SYears);
+    }
+    fclose(file);
 }
 
 void query2 ( mediaADT media , char * filePath )
