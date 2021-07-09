@@ -2,13 +2,24 @@
 #include <stdio.h>
 #include <string.h>
 
+
 #define MIN_YEAR 1850         /**< @def Minimo año que aceptara el TAD de pelicula/serie                    */
 #define MAX_GENRES 15         /**< @def Maxima cantidad de generos que aceptara el TAD por pelicula/serie   */
 #define BUFFER_SIZE 512       /** @def  Maxima cantidad de caracteres por linea que se obtendra del archivo */
 
+#define INVALID_PATH -1       /** @def  Codigo definido para indicar error de un Path que es invalido */
+
 /**< Macro que determina si S1 es del tipo pasado como parametro TYPE */
-#define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp(S1,S2)==0) \
+#define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp((S1),(S2))==0) \
                                                   return TYPE;}
+/**< Macro que determina si TO_CHECK es un cierto ERROR , en cuyo caso es enviado a la funcion errorManager
+ * que recibe como parametros el ADT y el tipo de error ERROR_TYPE*/
+#define ERROR_MANAGER(TO_CHECK,ERROR,ADT,ERROR_TYPE){ if ((TO_CHECK) == (ERROR)) \
+                                                  errorManager((ERROR_TYPE),(ADT));}
+
+/**< Macro que determina si E es un error FATAL que debe abortar la ejecucion del programa
+ * , esto es , RANGE_ERROR , MEM_ERROR o INVALID_PATH */
+#define IS_FATALERROR(E) ( (E) == RANGE_ERROR || (E) == MEM_ERROR || (E) == INVALID_PATH )
 
 const char * UNDEFINED_SYMBOL = "\\N"; /**< String que se colocara en campos vacios durante la impresion */
 
@@ -28,7 +39,29 @@ int getDataFromFile(mediaADT media, const char * filePath);
  */
 char ** createGenresVec(char ** vec, char * string);
 
+
+/**
+ * @brief Funcion que recibe una linea del csv y categoriza los datos en una estructura.
+ *
+ * @param line linea con datos a categorizar
+ * @param delim delimitador de datos de la linea
+ * @return TContent con los datos recopilados de la linea.
+ */
 TContent createContent(char * line, const char * delim );
+
+/**
+ * @brief Funcion que administra los errores de la implementacion
+ *
+ * @details Los errores categorizados como FATAL_ERRORS son aquellos que impiden la ejecucion del programa
+ * por lo que la funcion imprime un mensaje de error correspondiente y aborta. Liberando previamente
+ * los recursos utilizados por el ADT
+ * Los errores que no entran en esta categoria, permiten continuar la ejecucion ignorando
+ * la instancia en la que surjen , es decir , sin abortar.
+ *
+ * @param error  error que se desea administrar.
+ * @param media  ADT creado para el manejo de peliculas/series.
+ */
+void errorManager ( int error , mediaADT media );
 
 /**
  * @brief Funcion que determina si el contenido es una pelicula , serie u otro.
@@ -52,6 +85,14 @@ contentType getContentType ( TContent content );
  */
 void query1(mediaADT media, char * filePath);
 
+
+/**
+ * @brief Funcion que consulta la cantidad de peliculas y series de cada año y genero. Crea un archivo en el directorio
+ * especificado y escribe en el mismo con la iformacion obtenida.
+ *
+ * @param media ADT creado para el manejo de peliculas/series.
+ * @param filePath Directorio destino del archivo.
+ */
 void query2(mediaADT media, char * filePath);
 
 /**
@@ -88,15 +129,20 @@ contentType getContentType ( TContent content )
 int getDataFromFile(mediaADT media, const char * filePath){
     char buffer[BUFFER_SIZE];
     FILE *file = fopen(filePath, "r");
+    ERROR_MANAGER(file,NULL,media,INVALID_PATH)
     fgets(buffer, BUFFER_SIZE, file);
+    int out;
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
         contentType aux = getContentType(new);
-        if (aux == (contentType) CONTENTTYPE_ERROR)
-            //TENER EL CUIDADO DE SI HAY QUE LIBERAR O NO
-            exit(EXIT_FAILURE);
-
-        addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
+        if ( (enum errorStates)aux != CONTENTTYPE_ERROR)
+        {
+            out = addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
+            if (out != 1 )
+                errorManager(out,media);
+        }
+        else
+            errorManager((enum errorStates)aux,media);
         free(new.genres);
     }
     fclose(file);
@@ -144,6 +190,32 @@ TContent createContent(char * line, const char * delim)
     return newContent;
 }
 
+void errorManager ( int error , mediaADT media )
+{
+    switch (error) {
+        case INVALID_PATH:
+            printf("El path ingresado es invalido\n");
+            break;
+        case MEM_ERROR:
+            printf("Error en asignación de memoria \n");
+            break;
+        case RANGE_ERROR:
+            printf("El iterador no puede avanzar\n");
+            break;
+        case CONTENTTYPE_ERROR:
+            printf("Se ingreso un tipo de contenido inválido \n");
+            break;
+        default:
+            printf("Se ingreso un año inexistente o fuera de rango\n");
+    }
+    if (IS_FATALERROR(error))
+    {
+        if ( error != INVALID_PATH )
+            freeMediaADT(media);
+        exit(EXIT_FAILURE);
+    }
+}
+
 void query1(mediaADT media, char * filePath){
     ///Se crea el archivo, se abre en modo "write" para escribir sobre el mismo.
     FILE * file=fopen(filePath, "w");
@@ -155,6 +227,7 @@ void query1(mediaADT media, char * filePath){
     ///Se itera por años validos para obtener cantida de peliculas y series por año
     while (hasNextYear(media)){
         unsigned short year= nextYear(media);
+        ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
         size_t SYears= countContentByYear(media, year, CONTENTTYPE_SERIES);
         fprintf(file, "%u;%ld;%ld\n", year, MYears, SYears);
@@ -175,11 +248,13 @@ void query2 ( mediaADT media , char * filePath )
     while (hasNextYear(media))
     {
         unsigned int year = nextYear(media);
+        ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
         toBeginGenre(media,year);
         ///Se itera por generos validos para obtener la cantidad de peliculas del genero actual
         while(hasNextGenre(media))
         {
             char * genre = nextGenre(media);
+            ERROR_MANAGER(genre,NULL,media,RANGE_ERROR)
             size_t countOfMovies = countContentByGenre(media,year,genre,CONTENTTYPE_MOVIE);
 
             /** Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
@@ -203,7 +278,7 @@ void query3(mediaADT media, char * filePath){
     toBeginYear(media);
     while (hasNextYear(media)){ ///< Mientras aún existan años validos, se seguirá escribiendo el archivo.
         unsigned short year = nextYear(media);
-
+        ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
         ///Se obtiene la película y la serie más votada del año correspondiente.
         TContent movie = mostVoted(media, year, CONTENTTYPE_MOVIE);
         TContent series = mostVoted(media, year, CONTENTTYPE_SERIES);

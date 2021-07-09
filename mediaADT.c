@@ -270,11 +270,11 @@ static TList searchGenre ( const TList first , const char * genre )
 size_t countContentByGenre(const mediaADT media, const unsigned short year, const char * genre ,  contentType CONTENTTYPE_ )
 {
     if (isYearValid(media, year) != SUCCESS)
-        return INVALIDYEAR_ERROR;
+        return 0;
 
     TList auxGenre = searchGenre(media->years[POS(year, media->minYear)]->genres , genre );
     if ( auxGenre == NULL )
-        return NULLPOINTER_ERROR;
+        return 0;
 
     size_t aux;
     switch (CONTENTTYPE_) {
