@@ -24,13 +24,15 @@ enum errorStates {
 
 typedef struct mediaCDT * mediaADT;
 
+#define MAX_SIZE 256
+
 /**
  * @brief El usuario deberá definir una estructura con información sobre los contenidos
  * que desea guardar.
  */
 typedef struct content{
-    char * titleType;               /**< Tipo de contenido (película, serie)             */
-    char * primaryTitle;            /**< Título Original                                 */
+    char titleType[MAX_SIZE];       /**< Tipo de contenido (película, serie)             */
+    char primaryTitle[MAX_SIZE];    /**< Título Original                                 */
     char ** genres;                 /**< Lista de generos correspondientes al contenido  */
     unsigned short startYear;       /**< El año de lanzamiento o comienzo de emisión     */
     unsigned short endYear;         /**< Si es una serie, el año de finalización         */

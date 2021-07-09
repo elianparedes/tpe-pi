@@ -4,7 +4,7 @@
 
 #define MIN_YEAR 1850
 #define MAX_GENRES 15
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 512
 #define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp(S1,S2)==0) \
                                                   return TYPE;}
 
@@ -28,6 +28,17 @@ void query2(mediaADT media, char * filePath);
 void query3(mediaADT media, char * filePath);
 
 int main(int argc, char *argv[]) {
+
+    mediaADT media = newMediaADT(MIN_YEAR);
+
+    getDataFromFile(media, "../imdbv3.csv");
+
+    query1(media, "query1.csv");
+    query2(media, "query2.csv");
+    query3(media, "query3.csv");
+
+    freeMediaADT(media);
+
     return 0;
 }
 
@@ -88,11 +99,9 @@ char ** createGenresVec(char ** vec, char * string){
 TContent createContent(char * line, const char * delim )
 {
     TContent newContent ;
-    newContent.titleType = strtok(line,delim);
 
-    char * title = strtok(NULL,delim);
-    newContent.primaryTitle = malloc(strlen(title) + 1);
-    strcpy(newContent.primaryTitle, title);
+    strcpy(newContent.titleType, strtok(line, delim));
+    strcpy(newContent.primaryTitle, strtok(NULL, delim));
 
     newContent.startYear = atoi(strtok(NULL,delim));
     newContent.endYear = atoi(strtok(NULL,delim));
@@ -112,10 +121,9 @@ TContent createContent(char * line, const char * delim )
 void query1(mediaADT media, char * filePath){
     FILE * file=fopen(filePath, "w");
 
-    fprintf(file,"%s;%s;%s\n" , "year" ,"films", "series");
+    fprintf(file, "year;films;series\n");
 
     toBeginYear(media);
-    fprintf(file, "year;genre;films\n");
     while (hasNextYear(media)){
         unsigned short year= nextYear(media);
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
@@ -130,7 +138,7 @@ void query2 ( mediaADT media , char * filePath )
     FILE * file = fopen(filePath,"w");
 
     ///Se agrega el header correspondiende al archivo
-    fprintf(file,"%s;%s;%s\n" , "year" ,"genre", "films");
+    fprintf(file,"year;genre;films\n");
 
     toBeginYear(media);
     ///Se itera por años validos para obtener los generos y cantidad peliculas por genero
