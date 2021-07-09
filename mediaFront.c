@@ -22,6 +22,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
     fgets(buffer, BUFFER_SIZE, file);
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
+
         addContent(media, new, new.startYear, new.genres, new.numVotes, CONTENTTYPE_MOVIE);
         free(new.genres);
     }
@@ -94,10 +95,10 @@ void query2 ( mediaADT media , char * filePath )
         {
             char * genre = nextGenre(media);
             size_t countOfMovies = countContentByGenre(media,year,genre,CONTENTTYPE_MOVIE);
-            /*Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la iformacion en el
+            /*Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
             *archivo y se continua la iteracion
              */
-            fprintf(file,"%d;%s;%llu",year , genre , countOfMovies);
+            fprintf(file,"%d;%s;%zu\n",year , genre , countOfMovies);
         }
     }
 
