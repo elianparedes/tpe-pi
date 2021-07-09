@@ -10,17 +10,36 @@
 
 int getDataFromFile(mediaADT media, const char * filePath);
 
+/**
+ * @brief Funcion que llena un vector de char * pasado como parametro con los generos especificados por parametro "string".
+ * El ultimo elemento del vector tendra "NULL"
+ *
+ * @details El string pasado como parametro debe tener el caracter "," entre generos para poder separarlos en el vector.
+ * Si el string tuviera "\\N", el primer elemento del vector tendra "Genero no especificado" y la funcion ignorara el
+ * resto.
+ *
+ * @param vec Vector de char * que se llenara con los generos.
+ * @param string String que contiene los generos.
+ * @return El vector llenado que fue pasado como parametro.
+ */
 char ** createGenresVec(char ** vec, char * string);
 
 TContent createContent(char * line, const char * delim );
 
+/**
+ * @brief Funcion que consulta la cantidad de peliculas y series de cada año. Crea un archivo en el directorio especificado
+ * y escribe el mismo con la informacion obtenida.
+ *
+ * @param media ADT creado para el manejo de peliculas/series.
+ * @param filePath Directorio destino del archivo.
+ */
 void query1(mediaADT media, char * filePath);
 
 void query2(mediaADT media, char * filePath);
 
 /**
- * @brief Consulta las peliculas y series más votadas de cada año. Crea un archivo en el directorio especificado
- * y escribe el mismo con la información obtenida.
+ * @brief Funcion que consulta las peliculas y series más votadas de cada año. Crea un archivo en el directorio especificado
+ * y escribe el mismo con la informacion obtenida.
  *
  * @param media ADT creado para el manejo de películas/series.
  * @param filePath Directorio destino del archivo.
@@ -43,15 +62,15 @@ int main(int argc, char *argv[]) {
 }
 
 /**
- * @brief Determina si el contenido es una pelicula , serie u otro.
+ * @brief Funcion que determina si el contenido es una pelicula , serie u otro.
  *
  * @details Si no es una serie o una pelicula , devuelve CONTENTTYPE_ERROR indicando que no es
- * un contentType esperado
+ * un contentType esperado.
  *
- * @param content es el contenido del cual se determinara su contentType
- * @return CONTENTTYPE_MOVIE si es un pelicula
- * @return CONTENTTYPE_SERIES si es una serie
- * @return CONTENTTYPE_ERROR si no es serie o pelicula
+ * @param content es el contenido del cual se determinara su contentType.
+ * @return CONTENTTYPE_MOVIE si es un pelicula.
+ * @return CONTENTTYPE_SERIES si es una serie.
+ * @return CONTENTTYPE_ERROR si no es serie o pelicula.
  */
 contentType getContentType ( TContent content )
 {
@@ -81,7 +100,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
 
 char ** createGenresVec(char ** vec, char * string){
     char * token;
-    token = strtok(string, ",");
+    token = strtok(string, ","); /// La funcion "tokeniza" el string para poder separarlo con el delimitador ","
     unsigned int i=0;
     if (strcmp(token, "\\N")==0){
         vec[i++]= "Género no identificado";
@@ -122,9 +141,11 @@ TContent createContent(char * line, const char * delim)
 void query1(mediaADT media, char * filePath){
     FILE * file=fopen(filePath, "w");
 
+    ///Se agrega el header correspondiente al archivo.
     fprintf(file, "year;films;series\n");
 
     toBeginYear(media);
+    ///Se itera por años validos para obtener cantida de peliculas y series por año
     while (hasNextYear(media)){
         unsigned short year= nextYear(media);
         size_t MYears= countContentByYear(media, year, CONTENTTYPE_MOVIE);
