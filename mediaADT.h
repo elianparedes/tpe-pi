@@ -7,8 +7,8 @@
  * @brief Codigos de identificacion para los tipos de contenido.
  */
 typedef enum {
-    CONTENTTYPE_MOVIE = 1, /**< @enum Identificador contenido tipo Película */
-    CONTENTTYPE_SERIES     /**< @enum Identificador contenido tipo Serie    */
+    CONTENTTYPE_MOVIE = 1,   /**< @enum Identificador contenido tipo Película */
+    CONTENTTYPE_SERIES       /**< @enum Identificador contenido tipo Serie    */
 } contentType;
 
 /**
@@ -26,15 +26,16 @@ typedef struct mediaCDT * mediaADT;
 
 /**
  * @brief Tamaño de bloque para alocar memoria.
- * @details Varia el tamaño dependiendo del tamaño del proyecto.
+ * @details El usuario deberá variar el valor de esta constante numérica
+ * dependiendo de la magnitud del proyecto.
  *
  * @see MEM_BLOCK
  * */
 #define MEM_BLOCK 512
 
-#define MAX_TITLE_SIZE 256 /**< @def Tamaño maximo de titulo del contenido */
-#define MAX_TYPE_SIZE 32   /**< @def Tamaño maximo de tipo del contenido   */
-#define MAX_GENRE_SIZE 64  /**< @def Tamaño maximo de genero del contenido */
+#define MAX_TITLE_SIZE 256    /**< @def Tamaño maximo de titulo del contenido */
+#define MAX_TYPE_SIZE 32      /**< @def Tamaño maximo de tipo del contenido   */
+#define MAX_GENRE_SIZE 64     /**< @def Tamaño maximo de genero del contenido */
 
 /**
  * @brief El usuario debera definir una estructura con información sobre los contenidos
@@ -108,6 +109,7 @@ size_t countContentByGenre(const mediaADT media, const unsigned short year, cons
  * @param year Año del cual se desea obtener la pelicula/serie.
  * @param CONTENTTYPE_ Tipo del contenido que se desea obtener
  * @return TContent con los datos correspondientes a la pelicula/serie
+ * @return TContent vacío en caso de error.
  */
 TContent mostVoted(const mediaADT media, const unsigned short year, const contentType CONTENTTYPE_);
 

@@ -252,7 +252,6 @@ size_t countContentByYear(const mediaADT media, const unsigned short year, conte
  * @return NULL si el genero no esta en la lista.
  * @return Puntero al nodo si esta en la lista.
  */
-
 static TList searchGenre ( const TList first , const char * genre )
 {
     int c;
@@ -288,11 +287,19 @@ size_t countContentByGenre(const mediaADT media, const unsigned short year, cons
 }
 
 TContent mostVoted(const mediaADT media, const unsigned short year, const contentType CONTENTTYPE_){
+
+    /**
+     * Se crea un struct vacío, el cual la función retornará en caso de error
+     *
+     * @see mediaADT.h
+     */
     TContent mostVotedContent  = {0};
 
+    /// Se verifica si el año es valido
     if (isYearValid(media, year) != SUCCESS)
         return mostVotedContent;
 
+    /// Se verifica de que tipo de contenido se desea obtener el más votado
     switch (CONTENTTYPE_) {
         case CONTENTTYPE_MOVIE:
             mostVotedContent = media->years[POS(year,media->minYear)]->bestMovie;
@@ -315,6 +322,7 @@ TContent mostVoted(const mediaADT media, const unsigned short year, const conten
  */
 static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
     for (size_t i = fromIndex; i > 0; --i) {
+        /// Si el año encontrado no está vacio, setea el indice del iterador a la posición del mismo
         if (media->years[i] != NULL) {
             media->currentIndex = i;
             return;
@@ -324,19 +332,32 @@ static void nextOcuppiedYear(const mediaADT media, const size_t fromIndex) {
 }
 
 void toBeginYear(const mediaADT media){
+    /// Se busca el siguiente año valido.
     nextOcuppiedYear(media, media->size - 1);
 }
 
 int hasNextYear(const mediaADT media){
+    /// La iteración se realizará siempre y cuando se esté dentro del rango correspondiente
     return media->currentIndex < media->size;
 }
 
 unsigned short nextYear(const mediaADT media){
+
+    /**
+     * Si no quedan años validos por recorrer, la función devuelve RANGE_ERROR. El cual podrá ser manejado
+     * desde el frontend.
+     *
+     * @see mediaADT.h
+     */
+
     if (!hasNextYear(media)){
         return RANGE_ERROR;
     }
 
+    /// Se obtiene el año actual
     unsigned short year = YEAR(media->currentIndex, media->minYear);
+
+    ///Se busca el siguiente año valido desde la posicion actual
     nextOcuppiedYear(media, media->currentIndex - 1);
     return year;
 }
