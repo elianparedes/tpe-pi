@@ -1,6 +1,7 @@
 #include "mediaADT.h"
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 
 
 #define MIN_YEAR 1850         /**< @def Minimo año que aceptara el TAD de pelicula/serie                    */
