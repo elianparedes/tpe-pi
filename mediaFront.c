@@ -195,7 +195,7 @@ TContent createContent(char * line, const char * delim)
     return newContent;
 }
 
-void errorManager ( enum errorStates error , mediaADT media )
+void errorManager ( int  error , mediaADT media )
 {
     switch (error) {
         case INVALID_PATH:
