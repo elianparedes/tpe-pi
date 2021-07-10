@@ -128,18 +128,31 @@ contentType getContentType ( TContent content )
 }
 
 int getDataFromFile(mediaADT media, const char * filePath){
+
+    /// Se crea el buffer donde se almacenará temporalmente la linea obtenida durante la copia
     char buffer[BUFFER_SIZE];
+
+    ///Se abre el archivo en modo "read" para leer el contenido del mismo.
     FILE *file = fopen(filePath, "r");
-    ERROR_MANAGER(file,NULL,media,INVALID_PATH)
+    ERROR_MANAGER(file,NULL,media,INVALID_PATH) /// Se verifica que la operacion anterior se haya realizado correctamente
+
+    /// Se obtiene la primera linea del archivo, la cual se espera que sea el encabezado por lo que es ignorada
     fgets(buffer, BUFFER_SIZE, file);
     int out;
-    while (fgets(buffer, BUFFER_SIZE, file)){
+    while (fgets(buffer, BUFFER_SIZE, file)){ /// Se obtienen las demas lineas del archivo
+
+        /// Se utiliza un dato tipo TContent auxiliar, para almacenar la información y luego enviarla a la función addContent 
         TContent new = createContent(buffer, ";");
+
+        /// Se obtiene el tipo de contenido, de lo obtenido anteriormente 
         contentType aux = getContentType(new);
+
+
         if ( (enum errorStates)aux != CONTENTTYPE_ERROR)
         {
+            /// Mientras no hayan errores, se añade el contenido.
             out = addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
-            free(new.genres);
+            free(new.genres); /// Se libera el vector de generos auxiliar creado previamente en createContent
             if (out != 1 )
             {
                 errorManager(out,media);
@@ -150,6 +163,8 @@ int getDataFromFile(mediaADT media, const char * filePath){
             errorManager((enum errorStates)aux,media);
         }
     }
+
+    ///Se finaliza la lectura del archivo.
     fclose(file);
 
     return 1;
@@ -248,6 +263,8 @@ void query1(mediaADT media, char * filePath){
         size_t SYears= countContentByYear(media, year, CONTENTTYPE_SERIES);
         fprintf(file, "%u;%ld;%ld\n", year, MYears, SYears);
     }
+
+    ///Se finaliza la escritura del archivo.
     fclose(file);
 }
 
@@ -274,7 +291,7 @@ void query2 ( mediaADT media , char * filePath )
             size_t countOfMovies = countContentByGenre(media,year,genre,CONTENTTYPE_MOVIE);
 
             /** Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
-              * archivo y se continua la iteracion
+              * archivo y se continua la iteracion. En caso de no haber peliculas no se imprime la linea.
               */
               if (countOfMovies != 0){
                   fprintf(file,"%d;%s;%ld\n",year , genre , countOfMovies);
@@ -282,6 +299,7 @@ void query2 ( mediaADT media , char * filePath )
         }
     }
 
+    ///Se finaliza la escritura del archivo.
     fclose(file);
 }
 
@@ -297,6 +315,7 @@ void query3(mediaADT media, char * filePath){
     while (hasNextYear(media)){ ///< Mientras aún existan años validos, se seguirá escribiendo el archivo.
         unsigned short year = nextYear(media);
         ERROR_MANAGER(year,RANGE_ERROR,media,RANGE_ERROR)
+
         ///Se obtiene la película y la serie más votada del año correspondiente.
         TContent movie = mostVoted(media, year, CONTENTTYPE_MOVIE);
         TContent series = mostVoted(media, year, CONTENTTYPE_SERIES);
@@ -304,11 +323,19 @@ void query3(mediaADT media, char * filePath){
         /**
          * Se imprime en el archivo la información con el formato correspondiente.
          * En caso de que no se obtenga el titulo original de la pelicula/serie, se imprimira en su lugar
-         * un simbolo especial.
+         * un simbolo especial indicando que no se obtuvo información sobre ese campo.
          */
-        fprintf(file, "%d;%s;%lu;%.1f;%s;%lu;%.1f\n",year,
-                movie.primaryTitle[0] != '\0' ? movie.primaryTitle : UNDEFINED_SYMBOL ,movie.numVotes,movie.averageRating,
-                series.primaryTitle[0] != '\0' ? series.primaryTitle : UNDEFINED_SYMBOL,series.numVotes,series.averageRating);
+
+        if (movie.primaryTitle[0] == '\0')
+            fprintf(file, "%d;\\N;\\N;\\N;%s;%lu;%.1f\n",year, series.primaryTitle, series.numVotes, series.averageRating);
+
+        else if (series.primaryTitle[0] == '\0')
+            fprintf(file, "%d;%s;%lu;%.1f;\\N;\\N;\\N\n",year, movie.primaryTitle, movie.numVotes, movie.averageRating);
+                 
+        else
+            fprintf(file, "%d;%s;%lu;%.1f;%s;%lu;%.1f\n",year,
+                movie.primaryTitle, movie.numVotes, movie.averageRating,
+                series.primaryTitle, series.numVotes, series.averageRating);
 
     }
 
