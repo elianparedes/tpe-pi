@@ -18,7 +18,6 @@ enum errorStates {
     CONTENTTYPE_ERROR = 200, /**< @enum Tipo de contenido invalido            */
     MEM_ERROR,               /**< @enum Error en asignacion de memoria        */
     INVALIDYEAR_ERROR,       /**< @enum Año inexistente o fuera de rango      */
-    NULLPOINTER_ERROR,       /**< @enum Acceso invalido                       */
     RANGE_ERROR              /**< @enum El iterador no puede avanzar          */
 };
 
