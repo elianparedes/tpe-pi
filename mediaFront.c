@@ -262,7 +262,9 @@ void query2 ( mediaADT media , char * filePath )
             /** Se tiene año , genero y cantidad de peliculas para el par (año,genero). Se guarda la información en el
               * archivo y se continua la iteracion
               */
-            fprintf(file,"%d;%s;%ld\n",year , genre , countOfMovies);
+              if (countOfMovies != 0){
+                  fprintf(file,"%d;%s;%ld\n",year , genre , countOfMovies);
+              }
         }
     }
 
