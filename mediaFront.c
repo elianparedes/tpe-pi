@@ -4,22 +4,24 @@
 #include <strings.h>
 
 
-#define MIN_YEAR 1850         /**< @def Minimo año que aceptara el TAD de pelicula/serie                    */
-#define MAX_GENRES 15         /**< @def Maxima cantidad de generos que aceptara el TAD por pelicula/serie   */
-#define BUFFER_SIZE 512       /** @def  Maxima cantidad de caracteres por linea que se obtendra del archivo */
+#define MIN_YEAR 1850         /**< @def Minimo año que aceptara el TAD de pelicula/serie                     */
+#define MAX_GENRES 15         /**< @def Maxima cantidad de generos que aceptara el TAD por pelicula/serie    */
+#define BUFFER_SIZE 512       /**< @def  Maxima cantidad de caracteres por linea que se obtendra del archivo */
 
-#define INVALID_PATH (-1)       /** @def  Codigo definido para indicar error de un Path que es invalido */
+#define INVALID_PATH (-1)     /**< @def  Codigo definido para indicar error de un Path que es invalido       */
 
-/**< Macro que determina si S1 es del tipo pasado como parametro TYPE */
+/** Macro que determina si S1 es del tipo pasado como parametro TYPE */
 #define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp((S1),(S2))==0) \
                                                   return TYPE;}
-/**< Macro que determina si TO_CHECK es un cierto ERROR , en cuyo caso es enviado a la funcion errorManager
- * que recibe como parametros el ADT y el tipo de error ERROR_TYPE*/
+/** Macro que determina si TO_CHECK es un cierto ERROR , en cuyo caso es enviado a la funcion errorManager
+ * que recibe como parametros el ADT y el tipo de error ERROR_TYPE 
+ */
 #define ERROR_MANAGER(TO_CHECK,ERROR,ADT,ERROR_TYPE){ if ((TO_CHECK) == (ERROR)) \
                                                   errorManager((ERROR_TYPE),(ADT));}
 
-/**< Macro que determina si E es un error FATAL que debe abortar la ejecucion del programa
- * , esto es , RANGE_ERROR , MEM_ERROR o INVALID_PATH */
+/** Macro que determina si E es un error FATAL que debe abortar la ejecucion del programa
+ * , esto es , RANGE_ERROR , MEM_ERROR o INVALID_PATH  
+ */
 #define IS_FATALERROR(E) ( (E) == RANGE_ERROR || (E) == MEM_ERROR || (E) == INVALID_PATH )
 
 const char * UNDEFINED_SYMBOL = "\\N"; /**< String que se colocara en campos vacios durante la impresion */
