@@ -13,6 +13,7 @@
 /**< Macro que determina si S1 es del tipo pasado como parametro TYPE */
 #define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp((S1),(S2))==0) \
                                                   return TYPE;}
+
 /**< Macro que determina si TO_CHECK es un cierto ERROR , en cuyo caso es enviado a la funcion errorManager
  * que recibe como parametros el ADT y el tipo de error ERROR_TYPE*/
 #define ERROR_MANAGER(TO_CHECK,ERROR,ADT,ERROR_TYPE){ if ((TO_CHECK) == (ERROR)) \
