@@ -7,8 +7,8 @@
  * @brief Codigos de identificacion para los tipos de contenido.
  */
 typedef enum {
-    CONTENTTYPE_MOVIE = 1, /**< @enum Identificador contenido tipo Película */
-    CONTENTTYPE_SERIES     /**< @enum Identificador contenido tipo Serie    */
+    CONTENTTYPE_MOVIE = 1,   /**< @enum Identificador contenido tipo Película */
+    CONTENTTYPE_SERIES       /**< @enum Identificador contenido tipo Serie    */
 } contentType;
 
 /**
@@ -25,15 +25,16 @@ typedef struct mediaCDT * mediaADT;
 
 /**
  * @brief Tamaño de bloque para alocar memoria.
- * @details Varia el tamaño dependiendo del tamaño del proyecto.
+ * @details El usuario deberá variar el valor de esta constante numérica
+ * dependiendo de la magnitud del proyecto.
  *
  * @see MEM_BLOCK
  * */
 #define MEM_BLOCK 512
 
-#define MAX_TITLE_SIZE 256 /**< @def Tamaño maximo de titulo del contenido */
-#define MAX_TYPE_SIZE 32   /**< @def Tamaño maximo de tipo del contenido   */
-#define MAX_GENRE_SIZE 64  /**< @def Tamaño maximo de genero del contenido */
+#define MAX_TITLE_SIZE 256    /**< @def Tamaño maximo de titulo del contenido */
+#define MAX_TYPE_SIZE 32      /**< @def Tamaño maximo de tipo del contenido   */
+#define MAX_GENRE_SIZE 64     /**< @def Tamaño maximo de genero del contenido */
 
 /**
  * @brief El usuario debera definir una estructura con información sobre los contenidos
@@ -61,10 +62,11 @@ mediaADT newMediaADT(const size_t minYear);
 /**
  * @brief Función que añade pelicula/serie a un media ADT.
  *
- * @details La lista de generos ingresados sera ordenada alfabeticamente, mientras que las peliculas y series dentro de los generos
- * no tendran ningun orden (seran metidas al final de los vectores a medida que se ingresan)
+ * @details La lista de generos ingresados sera ordenada alfabeticamente en cada año, mientras que las peliculas
+ * y series dentro de los generos no tendran ningun orden (seran metidas al final de los vectores a medida que se
+ * ingresan)
  *
- * @param media Media ADT creado para el manejo de películas/series.
+ * @param media ADT creado para el manejo de películas/series.
  * @param content Contenido que sera añadido al ADT.
  * @param year Año en el que comenzo la pelicula/serie.
  * @param genre Vector de generos de la pelicula/serie.
@@ -80,7 +82,7 @@ int addContent( mediaADT media , const TContent content ,const unsigned short ye
 /**
  * @brief Funcion para obtener la cantidad de peliculas/series para un año.
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  * @param year Año del cual se solicita la cantidad de peliculas o de series.
  * @param CONTENTTYPE_ es el tipo de contenido del cual se desea conocer su cantidad para el año indicado.
  * Distinguiendo entre pelicula o serie.
@@ -91,7 +93,7 @@ size_t countContentByYear(const mediaADT media, const unsigned short year, conte
 /**
  * @brief Funcion para obtener la cantidad de peliculas/series para un genero en especifico de un año en especifico
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  * @param year Año del cual se solicita la cantidad de peliculas o de series.
  * @param genre Genero del cual se solicita la cantidad de peliculas o de series para el año especificado.
  * @param CONTENTTYPE_ es el tipo de contenido del cual se desea conocer su cantidad para el año y genero indicado.
@@ -103,10 +105,11 @@ size_t countContentByGenre(const mediaADT media, const unsigned short year, cons
 /**
  * @brief Funcion que devuelve la pelicula/serie con mayor cantidad de votos del año.
  *
- * @param Media ADT creado para el manejo de películas/series.
+ * @param media ADT creado para el manejo de películas/series.
  * @param year Año del cual se desea obtener la pelicula/serie.
  * @param CONTENTTYPE_ Tipo del contenido que se desea obtener
  * @return TContent con los datos correspondientes a la pelicula/serie
+ * @return TContent vacío en caso de error.
  */
 TContent mostVoted(const mediaADT media, const unsigned short year, const contentType CONTENTTYPE_);
 
@@ -137,7 +140,7 @@ void toBeginYear(const mediaADT media);
 /**
  * @brief Funcion que consulta si existe un año valido siguiente.
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  * @return 1 si existe un año valido siguiente del iterador.
  */
 int hasNextYear(const mediaADT media);
@@ -149,7 +152,7 @@ int hasNextYear(const mediaADT media);
  * de que no se verifique si hay un año siguiente valido en el iterador y se llame
  * a esta funcion, retornara RANGE_ERROR indicando que no hay un año valido.
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  * @return Año valido siguiente del iterador.
  * @return RANGE_ERROR Si no es un año valido siguiente del iterador
  */
@@ -176,7 +179,7 @@ unsigned short nextYear(const mediaADT media);
 /**
  * @brief Funcion que inicializa el iterador en el primer genero en orden alfabetico.
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  * @param year Año para el cual se desea iterar los generos validos de series y peliculas.
  * @return INVALIDYEAR_ERROR Si el año pasado como argumento es invalido.
  * @return 1 Si el iterador fue seteado correctamente.
@@ -186,7 +189,7 @@ int toBeginGenre (const mediaADT media , const unsigned short year );
 /**
  * @brief Funcion que consulta si existe un género válido siguiente.
  *
- * @param Media ADT creado para el manejo de películas/series.
+ * @param media ADT creado para el manejo de películas/series.
  * @return 1 si existe un género válido siguiente del iterador.
  */
 int hasNextGenre ( const mediaADT media );
@@ -198,7 +201,7 @@ int hasNextGenre ( const mediaADT media );
  * se verifique si hay un genero siguiente valido en el iterador y se llame a esta funcion,
  * retornara NULL indicando que no hay un genero valido.
  *
- * @param Media ADT creado para el manejo de películas/series.
+ * @param media ADT creado para el manejo de películas/series.
  * @return Genero valido siguiente del iterador.
  * @return NULL Si no hay un genero valido en el iterador.
  */
@@ -207,7 +210,7 @@ char * nextGenre ( const mediaADT media );
 /**
  * @brief Funcion que libera los recursos reservados por mediaADT.
  *
- * @param Media ADT creado para el manejo de peliculas/series.
+ * @param media ADT creado para el manejo de peliculas/series.
  */
 void freeMediaADT(mediaADT media);
 

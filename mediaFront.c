@@ -7,7 +7,7 @@
 #define MAX_GENRES 15         /**< @def Maxima cantidad de generos que aceptara el TAD por pelicula/serie   */
 #define BUFFER_SIZE 512       /** @def  Maxima cantidad de caracteres por linea que se obtendra del archivo */
 
-#define INVALID_PATH -1       /** @def  Codigo definido para indicar error de un Path que es invalido */
+#define INVALID_PATH (-1)       /** @def  Codigo definido para indicar error de un Path que es invalido */
 
 /**< Macro que determina si S1 es del tipo pasado como parametro TYPE */
 #define COMPARE_TYPES(S1,S2,TYPE) { if (strcasecmp((S1),(S2))==0) \
@@ -139,16 +139,16 @@ int getDataFromFile(mediaADT media, const char * filePath){
         if ( aux != CONTENTTYPE_ERROR)
         {
             out = addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
+            free(new.genres);
             if (out != 1 )
             {
                 errorManager(out,media);
             }
         }
-        else
-        {
+        else{
+            free(new.genres);
             errorManager((enum errorStates)aux,media);
         }
-        free(new.genres);
     }
     fclose(file);
 
