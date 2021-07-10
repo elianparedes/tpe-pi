@@ -109,8 +109,7 @@ int main(int argc, char *argv[]) {
 
     mediaADT media = newMediaADT(MIN_YEAR);
 
-    //getDataFromFile(media, argv[1]);
-    getDataFromFile(media, "../tpeFinal/imdbv3.csv");
+    getDataFromFile(media, argv[1]);
 
     query1(media, "query1.csv");
     query2(media, "query2.csv");
@@ -137,7 +136,7 @@ int getDataFromFile(mediaADT media, const char * filePath){
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
         contentType aux = getContentType(new);
-        if ( aux != CONTENTTYPE_ERROR)
+        if ( (enum errorStates)aux != CONTENTTYPE_ERROR)
         {
             out = addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
             free(new.genres);
@@ -196,7 +195,7 @@ TContent createContent(char * line, const char * delim)
     return newContent;
 }
 
-void errorManager ( int error , mediaADT media )
+void errorManager ( enum errorStates error , mediaADT media )
 {
     switch (error) {
         case INVALID_PATH:
