@@ -192,20 +192,26 @@ char ** createGenresVec(char ** vec, char * string){
 TContent createContent(char * line, const char * delim)
 {
     TContent newContent;
-
+    /// Se separan los datos de line mediante el delimitador.
     strcpy(newContent.titleType,strtok(line,delim));
 
     strcpy(newContent.primaryTitle,strtok(NULL,delim));
-
+    ///El uso de atoi y atof es para convertir aquellos datos de la linea que deberian ser tratados como numeros
     newContent.startYear = atoi(strtok(NULL,delim));
     newContent.endYear = atoi(strtok(NULL,delim));
 
+    /**Por el orden de los datos de line, en este punto se obtiene un string con los generos.
+     * Para no perder lo almacenado por strtok al llamar a la funcion createGenresVec ( que tambien utiliza strtok )
+     * se guarda el string del genero.Se continua creando los datos siguientes de la linea
+     * y finalmente, se llama a createGenresVec con el valor almacaenado.
+     */
     char * tokenAux = strtok(NULL,delim);
 
     newContent.averageRating = atof(strtok(NULL,delim));
     newContent.numVotes = atoi(strtok(NULL,delim));
     newContent.runtimeMinutes = atoi(strtok(NULL,delim));
 
+    ///La itencion es crear un vector de strings donde cada uno es un genero de la pelicula, conformando un  vector de generos.
     newContent.genres = malloc(MAX_GENRES*sizeof(char*));
     createGenresVec(newContent.genres, tokenAux);
 
@@ -230,6 +236,11 @@ void errorManager ( int  error , mediaADT media )
         default:
             break;
     }
+
+    /**
+     * En esta instancia se verifica si el error recibido es un FATAL ERROR. Ante la presencia de un error
+     * de esta clasificacion el programa debe abortar la ejecucion ,  liberando previamente los recursos reservados.
+     */
     if (IS_FATALERROR(error))
     {
         if ( error != INVALID_PATH )

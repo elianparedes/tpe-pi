@@ -71,7 +71,7 @@ mediaADT newMediaADT (const size_t minYear)
  * Al finalizar la carga, algunas posiciones del vector podrian quedar vacias. En este caso, se priorizo tiempo de ejecucion
  * sobre memoria debido a que podria haber una gran carga de datos.
  *
- * @param contentVec Vector de punteros a TContent en el que sera copiado al final la nueva película/serie.
+ * @param contentVec Vector de tipo TContent en el que sera copiado al final la nueva película/serie.
  * @param content Pelicula/serie que sera copiada.
  * @param index Indice del vector en el que sera copiado la pelicula/serie.
  * @return Puntero al comienzo del vector.
