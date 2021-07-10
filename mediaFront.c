@@ -108,7 +108,8 @@ int main(int argc, char *argv[]) {
 
     mediaADT media = newMediaADT(MIN_YEAR);
 
-    getDataFromFile(media, argv[1]);
+    //getDataFromFile(media, argv[1]);
+    getDataFromFile(media, "../tpeFinal/imdbv3.csv");
 
     query1(media, "query1.csv");
     query2(media, "query2.csv");
@@ -135,14 +136,18 @@ int getDataFromFile(mediaADT media, const char * filePath){
     while (fgets(buffer, BUFFER_SIZE, file)){
         TContent new = createContent(buffer, ";");
         contentType aux = getContentType(new);
-        if ( (enum errorStates)aux != CONTENTTYPE_ERROR)
+        if ( aux != CONTENTTYPE_ERROR)
         {
             out = addContent(media, new, new.startYear, new.genres, new.numVotes, aux);
             if (out != 1 )
+            {
                 errorManager(out,media);
+            }
         }
         else
+        {
             errorManager((enum errorStates)aux,media);
+        }
         free(new.genres);
     }
     fclose(file);
@@ -197,16 +202,16 @@ void errorManager ( int error , mediaADT media )
             printf("El path ingresado es invalido\n");
             break;
         case MEM_ERROR:
-            printf("Error en asignación de memoria \n");
+            printf("Error en asignacion de memoria \n");
             break;
         case RANGE_ERROR:
             printf("El iterador no puede avanzar\n");
             break;
         case CONTENTTYPE_ERROR:
-            printf("Se ingreso un tipo de contenido inválido \n");
+            printf("Se ingreso un tipo de contenido invalido \n");
             break;
         default:
-            printf("Se ingreso un año inexistente o fuera de rango\n");
+            break;
     }
     if (IS_FATALERROR(error))
     {
